@@ -1,7 +1,7 @@
 # The Hidden Vertex 🕵️‍♂️⚛️
 **Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders**
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11-+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch Geometric](https://img.shields.io/badge/PyG-State--of--the--Art-red.svg)](https://pytorch-geometric.readthedocs.io/en/latest/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Dataset: LHC Olympics 2020](https://img.shields.io/badge/Dataset-LHC_Olympics_2020-orange)](https://zenodo.org/records/4536624)
