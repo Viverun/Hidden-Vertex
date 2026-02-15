@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data (CRITICAL - Don't commit to GitHub!)
+dataset/raw/*.h5
+dataset/processed/*.pt
+results/models/*.pt
+results/logs/
+results/figures/
+results/scores/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.lock
+uv.lock

@@ -1,0 +1,25 @@
+
+# Core Deep Learning
+torch>=2.4.0
+torch-geometric>=2.5.0
+torch-scatter>=2.1.2
+torch-sparse>=0.6.18
+torch-cluster>=1.6.3
+
+# Data Processing  
+tables>=3.9.0
+h5py>=3.10.0
+numpy>=1.26.0
+pandas>=2.1.0
+
+# Training
+pytorch-lightning>=2.1.0
+tqdm>=4.67.3
+pyyaml>=6.0
+
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Utilities
+httpx>=0.28.1

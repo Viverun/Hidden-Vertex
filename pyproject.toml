@@ -1,0 +1,97 @@
+[project]
+name = "vertex"
+version = "0.1.0"
+description = "Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = [
+    "particle physics",
+    "anomaly detection", 
+    "graph neural networks",
+    "deep learning",
+    "LHC",
+    "autoencoders"
+]
+
+dependencies = [
+    # Core Deep Learning
+    "torch>=2.4.0",
+    "torch-geometric>=2.5.0",
+    "torch-scatter>=2.1.2",
+    "torch-sparse>=0.6.18",
+    "torch-cluster>=1.6.3",
+    
+    # Data Processing
+    "tables>=3.9.0",
+    "h5py>=3.10.0",
+    "numpy>=1.26.0",
+    "pandas>=2.1.0",
+    
+    # Training & Utilities
+    "pytorch-lightning>=2.1.0",
+    "tqdm>=4.67.3",
+    "pyyaml>=6.0",
+    
+    # Visualization
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    
+    # HTTP (kept from your original)
+    "httpx>=0.28.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "black>=23.0.0",
+    "flake8>=6.1.0",
+    "ipython>=8.12.0",
+]
+
+viz = [
+    "plotly>=5.18.0",
+    "scikit-learn>=1.3.0",  # For ROC curves
+]
+
+experiment = [
+    "tensorboard>=2.15.0",
+    "wandb>=0.16.0",
+]
+
+all = [
+    "vertex[dev,viz,experiment]"
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/vertex"
+Repository = "https://github.com/yourusername/vertex"
+Documentation = "https://github.com/yourusername/vertex/tree/main/docs"
+Issues = "https://github.com/yourusername/vertex/issues"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | dataset
+  | results
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --color=yes"
