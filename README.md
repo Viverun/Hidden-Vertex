@@ -58,24 +58,24 @@ Instead of teaching the AI what anomalies look like, we teach it what "normal" l
 │  TRAINING: Learn Standard Model     │
 │                                     │
 │  Input: 1M background events        │
-│    ↓                                │
+│        ↓                            │
 │  Graph Neural Network               │
-│    ↓                                │
+│        ↓                            │
 │  10D Bottleneck ← Forces learning!  │
-│    ↓                                │
+│        ↓                            │
 │  Reconstruction                     │
-│    ↓                                │
-│  Low error = Learned physics ✅     │
+│        ↓                            │
+│  Low error = Learned physics        │
 └─────────────────────────────────────┘
 
 ┌─────────────────────────────────────┐
 │  DETECTION: Find Anomalies          │
 │                                     │
 │  Standard Model Event:              │
-│    Low reconstruction error ✅      │
+│      Low Reconstruction Error       │
 │                                     │
 │  New Physics Event:                 │
-│    High reconstruction error 🚨     │
+│    High reconstruction error        │
 │    → Discovery candidate!           │
 └─────────────────────────────────────┘
 ```
