@@ -1,50 +1,54 @@
-# The Hidden Vertex 🕵️‍♂️⚛️
-**Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders**
 
-![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
-[![PyTorch Geometric](https://img.shields.io/badge/PyG-2.5.0-red.svg)](https://pytorch-geometric.readthedocs.io/en/latest/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dataset: LHC Olympics 2020](https://img.shields.io/badge/Dataset-LHC_Olympics_2020-orange)](https://zenodo.org/records/4536624)
+---
+
+````markdown
+# 🏛️ The Hidden Vertex 🕵️‍♂️⚛️
+### *Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders*
 
 ---
 
 ## 🎯 What Is This?
 
-**The Hidden Vertex** is a deep learning research project aimed at discovering unknown particles at the Large Hadron Collider (LHC) without being told what to look for.
+**The Hidden Vertex** is a deep learning research project aimed at discovering
+unknown particles at the **Large Hadron Collider (LHC)** without being told what
+to look for.
 
-**The Problem:** The LHC deletes 99.998% of collision data based on hard-coded rules. If new physics doesn't match our specific theoretical predictions, we throw it away forever.
+### The Problem
+The LHC trigger and filtering systems discard **99.998% of collision data** using
+hard-coded, theory-driven rules.  
+If new physics does not resemble our predefined expectations, it is lost
+forever.
 
-**Our Solution:** Train AI to learn "normal" Standard Model physics so well that anything unusual stands out automatically—enabling **model-independent discovery**. 
-
-
+### The Solution
+Train AI systems to learn **Standard Model (SM) physics so well** that anything
+unusual automatically stands out — enabling **model-independent discovery** of
+new physics.
 
 ---
 
 ## 🚀 Quick Start
 
-### Installation
+### 1. Kaggle Infrastructure (Recommended)
+
+The easiest way to explore this project is via the **Kaggle Model Hub**.
+
+- Attach Dataset: Add the `LHC_Collider` dataset to your notebook  
+- Import Model: Use the provided `model_architecture.py` and `norm_stats.pt`
+
+This provides a fully reproducible, dependency-safe environment.
+
+---
+
+### 2. Local Installation
 
 ```bash
 # Clone repository
-git clone [https://github.com/yourusername/vertex.git](https://github.com/yourusername/vertex.git)
-cd vertex
+git clone https://github.com/Viverun/Hidden-Vertex.git
+cd Hidden-Vertex
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
-
-# Install dependencies
+# Install dependencies (requires PyTorch Geometric)
 pip install -r requirements.txt
-
-```
-
-### Run the Baseline Pipeline (Google Colab)
-
-**5-Minute Setup:**
-
-1. Click "Open in Colab" above
-2. Mount Google Drive
-3. Run all cells to stream the HDF5 data and train the Autoencoder!
+````
 
 ---
 
@@ -52,141 +56,156 @@ pip install -r requirements.txt
 
 ### Why Graph Neural Networks?
 
-Traditional approaches force sparse particle data into dense image grids (CNNs) or flat arrays. We treat collisions as **geometric graphs**:
+Traditional ML approaches rasterize sparse particle data into dense images
+(CNNs).
+This project instead treats collisions as **geometric graphs**:
 
-* **Particles = Nodes** (Features: , , )
-* **Topology = Radius Graphs** (Edges connect particles within physical detector space , perfectly mimicking the anti- jet clustering algorithm).
+* **Particles → Nodes**
+  Features: `log pT`, `η`, `φ`
 
-### Architecture: The Node-Level Strict Autoencoder
+* **Topology → Radius Graphs**
+  Edges connect particles within physical detector space
+  `ΔR < 0.4`, mimicking the anti-`k_t` jet clustering algorithm
 
-In Phase 1, we test the hypothesis: *Can a node-level bottleneck detect event-level anomalies?*
+---
 
-```text
+### Architecture: Node-Level Strict Autoencoder
+
+**Phase 1 Hypothesis:**
+Can a node-level bottleneck detect event-level anomalies?
+
+```
 Input Graph (Radius Graph, ΔR < 0.4)
-    ↓
-GCN Layer 1: 3 → 16    (local jet structure)
-    ↓
-GCN Layer 2: 16 → 8    (neighborhood aggregation)
-    ↓
-Bottleneck: 8 → 1      (Strict 1D compression per particle!)
-    ↓
-Decoder: 1 → 8 → 16 → 3 (reconstruction)
-    ↓
-MSE Loss               (error = anomaly score)
-
+        ↓
+GCN Layers (Message Passing)
+        ↓
+Bottleneck: 1D Latent Space (per particle)
+        ↓
+Decoder: Reconstruction of (log pT, η, φ)
 ```
 
 ---
 
 ## 📊 Results & Scientific Findings
 
-We evaluated this baseline against the **LHC Olympics 2020 R&D dataset** (1M QCD background events, 100k hidden  signal events). During our research, we utilized the hidden truth labels to build an "Oracle" script, purifying the randomly shuffled dataset to ensure strict unsupervised learning on pure background.
+The baseline was evaluated using the **LHC Olympics 2020 R&D dataset**.
+An *Oracle purification* procedure ensured strictly unsupervised learning on
+pure background events only.
 
-### The Metrics
+### Metrics
 
-* **Synthetic Anomaly Detection:** When evaluating artificially injected high- anomalies, the model successfully isolated them with an **AUC of ~0.89**.
-* **Real Signal Detection:** When evaluated against the true, stealthy  decay, the model achieved an **AUC of 0.4650**.
+* **Purified Baseline AUC**: 0.4615
+* **Trainable Parameters**: 429
 
-### 🔬 The Physics Autopsy: The "Multiplicity Trap"
+### Key Result
 
-An AUC of 0.4650 is a massive scientific milestone—it mathematically proves a fundamental rule of high-energy physics: **You cannot detect an event-level anomaly by only looking at individual particles.**
+An AUC near **0.5** mathematically demonstrates a fundamental principle:
 
-To a node-level autoencoder, a 500 GeV particle from a standard QCD background jet looks *mathematically identical* to a 500 GeV particle from a BSM  decay. Because this architecture is blind to **Invariant Mass** and **Global Event Shape**, the AI simply flagged background events because they had higher particle multiplicity (more nodes = higher chance of a single node failing reconstruction).
+> You cannot detect an event-level anomaly by examining particles in isolation.
 
-**This establishes a rigorously tested baseline and sets the stage for our Phase 2 architecture.**
+---
+
+## 🔬 Physics Context
+
+This project is built using the **LHC Olympics 2020 Anomaly Detection Challenge**
+dataset. The objective is to identify **Beyond Standard Model (BSM)** physics
+signals hidden within a dominant background of **Standard Model QCD** radiation.
+
+### Note on Data
+
+The full raw HDF5 dataset (~23GB) is intentionally not stored here to keep this
+repository lightweight.
+
+Please refer to the official **Zenodo release** for the complete
+**1.1 million event dataset**.
+
+---
+
+## 🧠 The Discovery Logic: Why a 1D Bottleneck?
+
+This study employs a **Strict Node-Level Autoencoder**.
+
+By forcing each particle through a **1D latent bottleneck**, we directly test the
+hypothesis that BSM physics manifests as **irreducible particle-level
+reconstruction errors**.
+
+### Key Finding
+
+Results from **Part 1** show that while node-level GNNs are computationally
+efficient, detecting **heavy resonances** requires sensitivity to **global event
+structure**, such as:
+
+* Invariant mass distributions
+* Multi-jet correlations
+
+These effects are explored further in **Part 2**, which transitions toward
+**event-level latent representations**.
+
+---
+
+## 🔬 The Physics Autopsy: The *Multiplicity Trap*
+
+To a node-level autoencoder, a high-momentum particle from a standard QCD jet
+looks identical to one from a BSM decay.
+
+Because this architecture is blind to **global event shape**, it responds
+primarily to **particle multiplicity**, not anomalous physics.
+
+This rigorously establishes a scientifically meaningful baseline and motivates
+Phase 2.
 
 ---
 
 ## 📈 Roadmap
 
-### ✅ Phase 1: The Node-Level Baseline (Complete)
+### ✅ Phase 1: Node-Level Baseline (Complete)
 
-* [x] Memory-safe HDF5 streaming pipeline (bypassing C-level compression limits with `hdf5plugin`).
-* [x] Physical  Radius Graph generation via `torch.cdist`.
-* [x] Node-level 16-8-1 Strict Graph Autoencoder.
-* [x] Oracle dataset purification to separate weakly-supervised data.
-* [x] Mathematical proof of the "Multiplicity Trap" in per-particle compression.
+* ✓ Memory-safe HDF5 streaming pipeline
+* ✓ Radius graph generation via `torch.cdist`
+* ✓ Node-level 1D-bottleneck GNN autoencoder
+* ✓ Oracle dataset purification
 
-### 🔄 Phase 2: Global Jet Pooling (Up Next!)
+### 🔄 Phase 2: Global Event Learning (In Progress)
 
-* [ ] **Global Graph Pooling:** Upgrading to `global_mean_pool` to compress the entire jet shape into a single latent vector.
-* [ ] **4-Vector Kinematics:** Expanding inputs to  so the network inherently learns invariant mass.
-* [ ] **Point Cloud Loss:** Implementing Earth Mover's Distance (EMD) or Chamfer Distance for global shape reconstruction.
-
-### 🎯 Phase 3: Real-World Deployment
-
-* [ ] Test on real LHC open data.
-* [ ] Integration with hardware-level trigger simulation.
+* ⏳ Global graph pooling (`global_mean_pool`) for invariant mass sensitivity
+* ⏳ Energy-weighted attention to suppress detector noise
+* ⏳ Latent manifold analysis and 2D visualization
 
 ---
 
 ## 📚 Documentation
 
-**Choose your adventure:**
-
-| Document | Description | For Whom? |
-| --- | --- | --- |
-| **[OVERVIEW](https://www.google.com/search?q=docs/OVERVIEW.md)** | Big picture introduction | Everyone |
-| **[PHYSICS](https://www.google.com/search?q=docs/PHYSICS.md)** | Why this matters (lamppost problem,  bosons) | Physicists, Researchers |
-| **[ARCHITECTURE](https://www.google.com/search?q=docs/ARCHITECTURE.md)** | Technical deep dive into GNN limitations & upgrades | ML Engineers, Developers |
-| **[DATA](https://www.google.com/search?q=docs/DATA.md)** | Handling 2.78GB HDF5 files & Radius Graph creation | Data Scientists |
-
----
-
-## 🛠️ Project Structure
-
-```text
-vertex/
-├── README.md                    ← You are here
-├── requirements.txt             ← Includes torch_geometric, h5py, hdf5plugin
-│
-├── docs/                        ← Comprehensive documentation
-│   ├── PHYSICS.md               
-│   └── ARCHITECTURE.md          
-│
-├── data/                        ← Data scripts (Data is gitignored)
-│   ├── README.md                ← Zenodo download instructions
-│   └── purify_dataset.py        ← The Oracle extraction script
-│
-├── src/                         ← Core Physics Engine
-│   ├── dataset.py               ← HDF5 streaming & Delta R graph logic
-│   ├── model_node_level.py      ← The baseline 16-8-1 Strict AE
-│   └── evaluate.py              ← ROC-AUC metrics and visualization
-│
-└── notebooks/                   ← Jupyter notebooks
-    └── 01_Node_Level_Limits.ipynb ← The documented Phase 1 journey
-
-```
+| Resource   | Description                              |
+| ---------- | ---------------------------------------- |
+| Kaggle Hub | Access pretrained weights & architecture |
+| Notebook   | Step-by-step training walkthrough        |
 
 ---
 
 ## 📜 Citation
 
-If you use this data engineering pipeline or architecture baseline in your research, please cite:
-
 ```bibtex
 @software{hidden_vertex_2026,
-  title={The Hidden Vertex: Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders},
-  author={Jamil Khan},
-  year={2026},
-  url={[https://github.com/Viverun/Hidden-Vertex]},
-  note={Graph Neural Network baseline for particle physics anomaly detection}
+  title  = {The Hidden Vertex: Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders},
+  author = {Jamil Khan},
+  year   = {2026},
+  url    = {https://github.com/Viverun/Hidden-Vertex},
+  note   = {Graph Neural Network baseline for particle physics anomaly detection}
 }
-
+```
 
 ---
 
 ## 🌟 Why This Matters
 
-Discovery in particle physics has stagnated. We've found nothing fundamentally new at the LHC since the Higgs boson in 2012.
+Particle physics discovery has stagnated since the Higgs boson in 2012.
 
-**But what if new physics is there, and we're just not looking in the right way?**
+**The Hidden Vertex** shifts the paradigm from:
 
-This project represents a paradigm shift:
+*“Searching for what we predict”*
+to
+*“Discovering what we didn’t expect.”*
 
-* From "searching for what we predict"
-* To "discovering what we didn't expect"
+```
 
-**The future of physics is data-driven. Let's find what's hidden.** 🔍✨
-
-
+---
