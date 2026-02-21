@@ -1,7 +1,5 @@
 
 ---
-
-````markdown
 # 🏛️ The Hidden Vertex 🕵️‍♂️⚛️
 ### *Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders*
 
