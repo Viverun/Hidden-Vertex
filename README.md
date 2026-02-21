@@ -169,7 +169,7 @@ If you use this data engineering pipeline or architecture baseline in your resea
   title={The Hidden Vertex: Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders},
   author={Jamil Khan},
   year={2026},
-  url={[https://github.com/Viverun/Hidden-Vertex](https://github.com/yourusername/vertex)},
+  url={[https://github.com/Viverun/Hidden-Vertex]},
   note={Graph Neural Network baseline for particle physics anomaly detection}
 }
 
