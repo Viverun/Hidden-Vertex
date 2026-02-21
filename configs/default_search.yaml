@@ -1,0 +1,31 @@
+# ==============================================================================
+# HIDDEN-VERTEX: DEFAULT SEARCH CONFIGURATION
+# ==============================================================================
+
+# ─── DATA PARAMETERS ─────────────────────────────────────────────────────────
+data:
+  source_dir: "/kaggle/input/datasets/viveriun/lhc-collider/Processed_Graphs/processed"
+  stats_path: "/kaggle/input/datasets/viveriun/lhc-collider/norm_stats.pt"
+  batch_size: 64
+  num_workers: 0
+
+# ─── MODEL ARCHITECTURE ──────────────────────────────────────────────────────
+model:
+  input_dim: 3         # [pT, eta, phi]
+  latent_dim: 2        # Verified 2D bottleneck for optimal compression
+  hidden_layers: [32, 16]
+  dropout: 0.1
+
+# ─── PHYSICS TRAINING ────────────────────────────────────────────────────────
+training:
+  epochs: 10
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  # Prioritize pT (index 0) over angular noise
+  loss_weights: [10.0, 1.0, 1.0]
+
+# ─── DISCOVERY SCORING ───────────────────────────────────────────────────────
+evaluation:
+  score_reduction: "max"  # 'max' node error is most sensitive to W' signals
+  injection_test: True    # Enable for sensitivity verification
+  injection_strength: 3.0 # Log-pT kick used for 1.0 AUC verification

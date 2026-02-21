@@ -58,6 +58,29 @@ High reconstruction error = Something weird = Discovery candidate! 🎉
 
 ---
 
+## 🔁 Notebook-to-Repository Mapping (Part 1)
+
+The notebook is the **primary user workflow** for Part 1:
+
+- Start with `notebooks/lhc-anamoly-detector-part(1).ipynb`
+- Run cells sequentially for the full analysis narrative
+- Use repository scripts when you need automation/reproducibility outside notebooks
+
+The notebook `notebooks/lhc-anamoly-detector-part(1).ipynb` now maps directly to repository workflows:
+
+- **Act 1 (Data pipeline):** `src/data/dataset.py` (`create_radius_graph`, `LHCH5Dataset`)
+- **Act 2 (Strict bottleneck model):** `src/model/autoencoder.py` (`PhysicsAE` with configurable hidden layers/latent size)
+- **Act 3 (Oracle purification):** `src/data/oracle_split.py` + `python main.py prepare-part1 --config configs/part1_notebook_parity.yaml`
+- **Act 4 (ROC evaluation):** `python scripts/run_part1_eval.py --config configs/part1_notebook_parity.yaml`
+
+Primary outputs:
+
+- `results/models/part1_purified_baseline.pt`
+- `results/scores/part1_metrics.json`
+- `results/figures/part1_roc.png`
+
+---
+
 ## 🧠 How It Works: The "Detective School" Analogy
 
 ### Training Phase: Teaching the Detective
@@ -287,36 +310,30 @@ Epoch 20: Loss = 0.078 (convergence) ✅
 
 ### Anomaly Separation
 
-**Key Metric:** Reconstruction error on test set.
+**Key Metric:** Reconstruction error behavior on an oracle-purified test set.
 
 ```
 Background Events (Standard Model):
-  Mean Error: 0.08 ± 0.02  ← Low error (AI recognizes)
+  Reconstructs similarly to signal under node-level constraints
   
 Anomaly Events (New Physics):
-  Mean Error: 0.45 ± 0.15  ← High error (AI confused)
+  Also reconstructs similarly at event level with this architecture
   
-Separation Factor: 5.6x  ✅
+Separation: weak (near-random discrimination)
 ```
 
 **Interpretation:**
-- Background events reconstruct well (learned patterns)
-- Anomaly events fail to reconstruct (off-manifold)
-- Clear separation → successful anomaly detection!
+- Node-level compression captures local kinematics but misses event-level structure.
+- Heavy-resonance signals are not reliably separated by this Part 1 baseline.
+- This is a meaningful negative baseline that motivates Part 2.
 
 ### ROC Curve Performance
 
 ```
-ROC-AUC: 0.94 (excellent discrimination)
-
-At 90% Signal Efficiency:
-  Background Rejection: ~95%
-  
-At 95% Background Rejection:
-  Signal Efficiency: ~85%
+Purified baseline ROC-AUC: ~0.46
 ```
 
-**Translation:** Can identify 85% of new physics events while only mis-flagging 5% of background as anomalies.
+**Translation:** Performance is near random, supporting the Part 1 conclusion that node-level-only reconstruction is insufficient for event-level anomaly discovery.
 
 ### Computational Performance
 
@@ -332,7 +349,7 @@ At 95% Background Rejection:
 **Scalability:**
 - Handles variable-size graphs (10-700 particles)
 - Memory efficient (batch processing)
-- Production-ready for real LHC data rates
+- Baseline-ready for Part 2 architecture iteration
 
 ---
 
@@ -559,29 +576,25 @@ See `CONTRIBUTING.md` for guidelines.
 
 ## 📊 Roadmap
 
-### Phase 1: Core Development ✅
-- [x] Graph Autoencoder architecture
-- [x] Training pipeline
-- [x] Evaluation metrics
-- [x] Documentation
+### Phase 1: Node-Level Baseline ✅ (Complete)
 
-### Phase 2: Optimization (Current)
-- [ ] Hyperparameter tuning
-- [ ] Alternative loss functions (Chamfer distance)
-- [ ] Attention mechanisms
-- [ ] Ablation studies
+- [x] Radius-graph data pipeline
+- [x] Oracle-purified baseline training/evaluation
+- [x] Reproducible Part 1 repository workflow
+- [x] Part 1 conclusion documented
 
-### Phase 3: Real-World Deployment
-- [ ] Test on real LHC data
-- [ ] Production inference pipeline
-- [ ] Integration with detector software
-- [ ] Physics validation
+### Phase 2: Event-Level Learning 🔄 (Current)
 
-### Phase 4: Extensions
-- [ ] Multi-task learning (classification + reconstruction)
-- [ ] Generative modeling (sample new events)
-- [ ] Transfer learning to other detectors
-- [ ] Real-time trigger system
+- [ ] Global event pooling and event-level latent bottleneck
+- [ ] Invariant-mass-sensitive feature learning
+- [ ] Improved reconstruction objective for whole-event structure
+- [ ] Ablation studies against Part 1 baseline
+
+### Phase 3: Scale-Up Validation
+
+- [ ] Larger-scale training/evaluation sweeps
+- [ ] Robustness checks across anomaly regimes
+- [ ] Physics-driven validation and interpretability
 
 ---
 
@@ -592,9 +605,9 @@ If you use this work in your research, please cite:
 ```bibtex
 @software{hidden_vertex_2026,
   title={The Hidden Vertex: Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders},
-  author={Your Name},
+  author={Jamil Khan},
   year={2026},
-  url={https://github.com/yourusername/vertex},
+  url={https://github.com/Viverun/Hidden-Vertex},
   note={Graph Neural Network-based anomaly detection for particle physics}
 }
 ```

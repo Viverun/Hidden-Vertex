@@ -22,11 +22,31 @@ Train AI systems to learn **Standard Model (SM) physics so well** that anything
 unusual automatically stands out — enabling **model-independent discovery** of
 new physics.
 
+### Project Status (Feb 2026)
+
+- **Part 1 is complete** and frozen as a baseline milestone.
+- The Part 1 conclusion is a **negative-but-useful result**: node-level bottlenecks did not separate event-level anomalies reliably.
+- **Part 2 is next** and focuses on global event representation learning.
+
+For this reason, Part 1 should be interpreted as a validated infrastructure + physics baseline, not as a final anomaly detector.
+
 ---
 
 ## 🚀 Quick Start
 
-### 1. Kaggle Infrastructure (Recommended)
+### 1. Notebook-First Experience (Recommended)
+
+For most users, the notebook is the primary and best way to use this project.
+
+- Open: `notebooks/lhc-anamoly-detector-part(1).ipynb`
+- Follow cells in order to reproduce the full Part 1 story (data pipeline → model → oracle purification → ROC analysis)
+- Use Kaggle runtime for easiest dependency compatibility
+
+This is the **canonical user-facing workflow** for Part 1.
+
+---
+
+### 2. Kaggle Infrastructure (Optional Setup Path)
 
 The easiest way to explore this project is via the **Kaggle Model Hub**.
 
@@ -37,7 +57,7 @@ This provides a fully reproducible, dependency-safe environment.
 
 ---
 
-### 2. Local Installation
+### 3. Local Installation (Developer / Repro Support)
 
 ```bash
 # Clone repository
@@ -47,6 +67,24 @@ cd Hidden-Vertex
 # Install dependencies (requires PyTorch Geometric)
 pip install -r requirements.txt
 ````
+
+### 4. Part 1 Notebook Parity (Repository Workflow)
+
+To reproduce notebook logic via local scripts/modules:
+
+```bash
+# 1) Build oracle-purified train/test split
+python main.py prepare-part1 --config configs/part1_notebook_parity.yaml
+
+# 2) Train + evaluate Part 1 purified baseline
+python scripts/run_part1_eval.py --config configs/part1_notebook_parity.yaml
+```
+
+Outputs are saved to:
+
+- `results/models/part1_purified_baseline.pt`
+- `results/scores/part1_metrics.json`
+- `results/figures/part1_roc.png`
 
 ---
 
@@ -92,7 +130,7 @@ pure background events only.
 
 ### Metrics
 
-* **Purified Baseline AUC**: 0.4615
+* **Purified Baseline AUC**: ~0.46 (random-level discrimination)
 * **Trainable Parameters**: 429
 
 ### Key Result
@@ -154,6 +192,25 @@ Phase 2.
 
 ---
 
+## ⚠️ Known Limitations (Part 1)
+
+- Node-level reconstruction is weak for event-level anomaly signatures.
+- The model does not explicitly encode invariant mass or global event shape.
+- Max-node error scoring can be biased by multiplicity effects.
+- Part 1 is a baseline/proof stage, not a final discovery architecture.
+
+---
+
+## ✅ Part 1 Freeze Checklist
+
+- Notebook is the canonical user-facing Part 1 workflow.
+- Notebook narrative and repository workflow are aligned for baseline reproduction.
+- Oracle purification + evaluation scripts are available in repository code.
+- Part 1 outputs are reproducible via the commands in Quick Start.
+- Further model changes should be tracked under Part 2.
+
+---
+
 ## 📈 Roadmap
 
 ### ✅ Phase 1: Node-Level Baseline (Complete)
@@ -166,7 +223,8 @@ Phase 2.
 ### 🔄 Phase 2: Global Event Learning (In Progress)
 
 * ⏳ Global graph pooling (`global_mean_pool`) for invariant mass sensitivity
-* ⏳ Energy-weighted attention to suppress detector noise
+* ⏳ Event-level latent bottleneck replacing per-node-only logic
+* ⏳ Richer kinematics for resonance-aware learning
 * ⏳ Latent manifold analysis and 2D visualization
 
 ---

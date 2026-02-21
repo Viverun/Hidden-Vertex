@@ -1,0 +1,36 @@
+# ============================================================================== 
+# HIDDEN-VERTEX: PART 1 NOTEBOOK PARITY CONFIGURATION
+# Reproduces the workflow described in notebooks/lhc-anamoly-detector-part(1).ipynb
+# ============================================================================== 
+
+data:
+  h5_path: "dataset/raw/events_anomalydetection.h5"
+  source_dir: "dataset/processed"
+  stats_path: "dataset/raw/norm_stats.pt"
+  batch_size: 256
+  radius: 0.4
+  scan_limit: 200000
+
+model:
+  input_dim: 3
+  latent_dim: 1
+  hidden_layers: [16, 8]
+  dropout: 0.1
+
+training:
+  epochs: 5
+  learning_rate: 0.005
+  weight_decay: 0.0
+  loss_mode: "pt_only"        # options: weighted, pt_only
+  loss_weights: [10.0, 1.0, 1.0]
+
+oracle:
+  train_target: 40000
+  test_bg_target: 5000
+  test_sig_target: 5000
+
+evaluation:
+  score_reduction: "max"      # options: max, mean
+  model_path: "results/models/part1_purified_baseline.pt"
+  metrics_path: "results/scores/part1_metrics.json"
+  roc_path: "results/figures/part1_roc.png"
