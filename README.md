@@ -203,5 +203,3 @@ Particle physics discovery has stagnated since the Higgs boson in 2012.
 *“Searching for what we predict”*
 to
 *“Discovering what we didn’t expect.”*
-
-```
