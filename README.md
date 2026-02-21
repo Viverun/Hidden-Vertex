@@ -30,7 +30,7 @@ new physics.
 
 The easiest way to explore this project is via the **Kaggle Model Hub**.
 
-- Attach Dataset: [https://www.kaggle.com/datasets/viveriun/lhc-collider]
+- Attach Dataset: [https://www.kaggle.com/datasets/viveriun/lhc-collider](https://www.kaggle.com/datasets/viveriun/lhc-collider)
 - Import Model: Use the provided `model_architecture.py` and `norm_stats.pt`
 
 This provides a fully reproducible, dependency-safe environment.
