@@ -1,12 +1,3 @@
-This is the perfect moment to pivot the README from a "marketing pitch" to a **brilliant, scientifically rigorous research portfolio**.
-
-We are going to keep your amazing formatting, your "Choose your adventure" path, and your stellar hooks. But we are going to update the **Architecture**, **Results**, and **Roadmap** to tell the true story of Part 1. By openly discussing the 0.4650 AUC and the "Multiplicity Trap," you demonstrate deep scientific maturity—which hiring managers and senior researchers value far more than a fabricated 0.94 score.
-
-Here is your fully updated, scientifically accurate, and incredibly impressive `README.md`. Copy and paste this directly into your repository!
-
----
-
-```markdown
 # The Hidden Vertex 🕵️‍♂️⚛️
 **Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders**
 
