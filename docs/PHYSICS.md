@@ -1,5 +1,10 @@
 # Physics Background - The Hidden Vertex
 
+> **Note (2026-10):** Parts of this document describe the *planned* design (k-NN graphs, a 10D
+> event-level latent, global pooling). The implemented Part 1 baseline uses ΔR < 0.4 radius graphs and a
+> per-particle 1D latent (`configs/part1_notebook_parity.yaml`). For verified Part 1 numbers see
+> [`PART1_VERIFICATION.md`](PART1_VERIFICATION.md).
+
 > **Understanding the physics motivation behind unsupervised anomaly detection at the LHC**
 
 ## Table of Contents

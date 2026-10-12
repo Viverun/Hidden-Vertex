@@ -18,30 +18,23 @@ keywords = [
 ]
 
 dependencies = [
-    # Core Deep Learning
+    # Core Deep Learning (torch_geometric.utils.scatter uses native torch ops,
+    # so the compiled torch-scatter/sparse/cluster extensions are not needed)
     "torch>=2.4.0",
     "torch-geometric>=2.5.0",
-    "torch-scatter>=2.1.2",
-    "torch-sparse>=0.6.18",
-    "torch-cluster>=1.6.3",
-    
+
     # Data Processing
-    "tables>=3.9.0",
     "h5py>=3.10.0",
+    "hdf5plugin>=4.0.0",  # compression filters used by the LHCO HDF5 files
     "numpy>=1.26.0",
-    "pandas>=2.1.0",
-    
-    # Training & Utilities
-    "pytorch-lightning>=2.1.0",
+
+    # Training & Evaluation
+    "scikit-learn>=1.3.0",  # ROC-AUC
     "tqdm>=4.67.3",
     "pyyaml>=6.0",
-    
+
     # Visualization
     "matplotlib>=3.8.0",
-    "seaborn>=0.13.0",
-    
-    # HTTP (kept from your original)
-    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
@@ -54,7 +47,7 @@ dev = [
 
 viz = [
     "plotly>=5.18.0",
-    "scikit-learn>=1.3.0",  # For ROC curves
+    "seaborn>=0.13.0",
 ]
 
 experiment = [

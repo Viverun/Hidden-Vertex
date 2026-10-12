@@ -4,12 +4,15 @@
 # ============================================================================== 
 
 data:
-  h5_path: "dataset/raw/events_anomalydetection.h5"
+  h5_path: "dataset/raw/events_anomalydetection_v2.h5"
   source_dir: "dataset/processed"
-  stats_path: "dataset/raw/norm_stats.pt"
+  stats_path: null            # null = notebook's hard-coded constants (exact parity)
   batch_size: 256
   radius: 0.4
-  scan_limit: 200000
+  wrap_phi: false             # true = periodic Δφ (physically correct; notebook used false)
+  scan_limit: null            # null = whole file. Needed for v2, which is sorted (signal = rows 1,000,000+);
+                              # the notebook's shuffled v1 file filled all quotas within ~56k rows
+  split_path: "results/scores/part1_oracle_split.pt"   # written by prepare-part1, reused by eval
 
 model:
   input_dim: 3
@@ -19,6 +22,7 @@ model:
 
 training:
   epochs: 5
+  seed: 0                     # notebook was unseeded; fixed here for reproducibility
   learning_rate: 0.005
   weight_decay: 0.0
   loss_mode: "pt_only"        # options: weighted, pt_only
@@ -33,4 +37,5 @@ evaluation:
   score_reduction: "max"      # options: max, mean
   model_path: "results/models/part1_purified_baseline.pt"
   metrics_path: "results/scores/part1_metrics.json"
+  scores_path: "results/scores/part1_scores.npz"
   roc_path: "results/figures/part1_roc.png"

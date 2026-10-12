@@ -66,6 +66,9 @@ cd Hidden-Vertex
 
 # Install dependencies (requires PyTorch Geometric)
 pip install -r requirements.txt
+
+# Run the test suite
+python -m pytest tests
 ````
 
 ### 4. Part 1 Notebook Parity (Repository Workflow)
@@ -83,8 +86,16 @@ python scripts/run_part1_eval.py --config configs/part1_notebook_parity.yaml
 Outputs are saved to:
 
 - `results/models/part1_purified_baseline.pt`
-- `results/scores/part1_metrics.json`
+- `results/scores/part1_metrics.json` (AUC, bootstrap 95% CI, seed)
+- `results/scores/part1_scores.npz` (per-event scores and labels)
 - `results/figures/part1_roc.png`
+
+Runs are seeded (`training.seed`, or `--seed N`); `run_part1_eval.py` reuses the split saved by
+`prepare-part1`. Optional diagnostics (baselines, correlations, ablations):
+
+```bash
+python scripts/part1_diagnostics.py --features dataset/raw/events_anomalydetection_v2.features.h5
+```
 
 ---
 
@@ -130,14 +141,22 @@ pure background events only.
 
 ### Metrics
 
-* **Purified Baseline AUC**: ~0.46 (random-level discrimination)
-* **Trainable Parameters**: 429
+| | AUC |
+|---|---|
+| Notebook (original shuffled `events_anomalydetection.h5`, 1 unseeded run) | 0.4615 |
+| Repository pipeline (`events_anomalydetection_v2.h5`, seeds 0–4) | **0.483 ± 0.005** |
+
+* **Trainable Parameters**: 420 effective (the notebook reports 429; 9 belong to an attention gate whose output is never used)
+* Full verification, baselines and ablations: [`docs/PART1_VERIFICATION.md`](docs/PART1_VERIFICATION.md)
 
 ### Key Result
 
-An AUC near **0.5** mathematically demonstrates a fundamental principle:
+The node-level reconstruction error is slightly **below** random (a weak inverted signal):
+it scores QCD background as marginally more anomalous than the W′ signal.
 
-> You cannot detect an event-level anomaly by examining particles in isolation.
+This is a failure of the *reconstruction-error score*, not of particle-level information:
+simple event quantities built from the same particle lists separate well (Σ pT: AUC 0.79,
+fewer particles: 0.72; jet-level −τ21: 0.80).
 
 ---
 
@@ -149,8 +168,14 @@ signals hidden within a dominant background of **Standard Model QCD** radiation.
 
 ### Note on Data
 
-The full raw HDF5 dataset (~23GB) is intentionally not stored here to keep this
+The full raw HDF5 dataset is intentionally not stored here to keep this
 repository lightweight.
+
+**Two file versions behave differently.** The notebook used the original shuffled
+`events_anomalydetection.h5` (~9% signal throughout). The public
+`events_anomalydetection_v2.h5` (e.g. Kaggle `atulchikku/lhc-olympics-2020-ad-r-and-d`) is **sorted**:
+rows 0–999,999 are background and 1,000,000+ are signal. The parity config therefore uses
+`scan_limit: null` so the oracle split scans the whole file.
 
 Please refer to the official **Zenodo release** for the complete
 **1.1 million event dataset**.
@@ -179,16 +204,18 @@ These effects are explored further in **Part 2**, which transitions toward
 
 ---
 
-## 🔬 The Physics Autopsy: The *Multiplicity Trap*
+## 🔬 The Physics Autopsy: What the Score Actually Measures
 
-To a node-level autoencoder, a high-momentum particle from a standard QCD jet
-looks identical to one from a BSM decay.
+Two ablations explain the result (details in `docs/PART1_VERIFICATION.md`):
 
-Because this architecture is blind to **global event shape**, it responds
-primarily to **particle multiplicity**, not anomalous physics.
+* **The 1D bottleneck does not constrain anything.** The loss only scores pT, and a 1D latent can carry
+  pT losslessly: a per-particle MLP with the same bottleneck reaches MSE 0.0001.
+* **All reconstruction error comes from GCN neighbourhood averaging** (ΔR < 0.4). The score measures how
+  far a particle's pT is from its neighbours'. It tracks the **leading-particle pT** (Spearman 0.70),
+  not multiplicity (−0.07), so the earlier "multiplicity trap" explanation is not supported.
 
-This rigorously establishes a scientifically meaningful baseline and motivates
-Phase 2.
+At fixed leading-particle pT, signal events reconstruct slightly *better* than QCD, which produces the
+sub-0.5 AUC. This motivates Phase 2: an event-level bottleneck and jet/substructure-aware inputs.
 
 ---
 
@@ -196,7 +223,8 @@ Phase 2.
 
 - Node-level reconstruction is weak for event-level anomaly signatures.
 - The model does not explicitly encode invariant mass or global event shape.
-- Max-node error scoring can be biased by multiplicity effects.
+- Max-node error scoring is dominated by the leading particle's pT.
+- With a pT-only loss, the 1D latent is not an information bottleneck.
 - Part 1 is a baseline/proof stage, not a final discovery architecture.
 
 ---

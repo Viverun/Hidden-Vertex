@@ -1,16 +1,38 @@
 import os
 import argparse
+import random
+import numpy as np
 import yaml
 import torch
 from src.model.autoencoder import PhysicsAE
 from src.data.loader import get_discovery_loaders
 from src.data.oracle_split import build_oracle_purified_split
+from src.data.transforms import load_norm_stats
 from src.training.engine import train_one_epoch, validate
-from src.utils.metrics import compute_anomaly_scores, get_performance_stats
 
 def load_config(config_path):
     with open(config_path, 'r') as f:
         return yaml.safe_load(f)
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+def load_background_indices(source_dir):
+    """
+    Background events are selected by truth label: the original R&D file is shuffled
+    (~9% signal), and v2 is sorted, so index ranges are not a safe proxy. `scripts/process_h5.py` writes these labels to `labels.npy`.
+    """
+    labels_path = os.path.join(source_dir, 'labels.npy')
+    if not os.path.exists(labels_path):
+        raise FileNotFoundError(
+            f"{labels_path} not found. Re-run scripts/process_h5.py to regenerate the chunks "
+            "and labels; training on unfiltered indices would mix signal into the background."
+        )
+    labels = np.load(labels_path)
+    return np.flatnonzero(labels == 0).tolist()
 
 def setup_results_dirs():
     """Ensure the results folder isn't empty anymore once we run!"""
@@ -20,20 +42,23 @@ def setup_results_dirs():
 def run_default_training(config_path):
     setup_results_dirs()
     config = load_config(config_path)
+    if config['training'].get('seed') is not None:
+        set_seed(config['training']['seed'])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # 1. Load Physics Normalization Stats
     # These are vital for the Log-pT transform in your engine
-    stats = torch.load(config['data']['stats_path'], map_location=device)
-    gpu_mean, gpu_std = stats['mean'], stats['std']
+    gpu_mean, gpu_std = load_norm_stats(config['data']['stats_path'], device)
     
     # 2. Setup Data
-    # Using the LHCO 2020 background indices (1 million events)
-    bg_idx = list(range(1000000))
+    # Background-only indices of the LHCO 2020 R&D set (selected by truth label)
+    bg_idx = load_background_indices(config['data']['source_dir'])
     train_ld, val_ld, _ = get_discovery_loaders(
         config['data']['source_dir'], 
         bg_idx, 
-        batch_size=config['data']['batch_size']
+        batch_size=config['data']['batch_size'],
+        num_workers=config['data'].get('num_workers', 0),
+        chunk_size=config['data'].get('chunk_size', 10000),
     )
     
     # 3. Initialize Model & Training Tools
@@ -46,7 +71,8 @@ def run_default_training(config_path):
     
     optimizer = torch.optim.AdamW(
         model.parameters(), 
-        lr=config['training']['learning_rate']
+        lr=config['training']['learning_rate'],
+        weight_decay=float(config['training'].get('weight_decay', 0.0)),
     )
     
     loss_weights = torch.tensor(config['training']['loss_weights']).to(device)
@@ -88,21 +114,25 @@ def prepare_part1(config_path):
     setup_results_dirs()
     config = load_config(config_path)
 
-    train_graphs, test_graphs, test_labels = build_oracle_purified_split(
+    train_graphs, test_graphs, test_labels, train_indices, test_indices = build_oracle_purified_split(
         h5_path=config['data']['h5_path'],
         train_target=config['oracle']['train_target'],
         test_bg_target=config['oracle']['test_bg_target'],
         test_sig_target=config['oracle']['test_sig_target'],
         scan_limit=config['data']['scan_limit'],
         radius=config['data']['radius'],
+        wrap_phi=config['data'].get('wrap_phi', False),
+        return_indices=True,
     )
 
-    output_path = 'results/scores/part1_oracle_split.pt'
+    output_path = config['data'].get('split_path', 'results/scores/part1_oracle_split.pt')
     torch.save(
         {
             'train_graphs': train_graphs,
             'test_graphs': test_graphs,
             'test_labels': test_labels,
+            'train_indices': train_indices,
+            'test_indices': test_indices,
         },
         output_path,
     )

@@ -1,55 +1,64 @@
-import h5py
-import torch
-import numpy as np
-from torch_geometric.data import Data
-from tqdm import tqdm
+import argparse
 import os
+import sys
 
-def process_h5_to_graphs(h5_path, output_dir, chunk_size=10000):
+import numpy as np
+import torch
+from tqdm import tqdm
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.data.dataset import LABEL_COLUMN, create_radius_graph, open_events
+from torch_geometric.data import Data
+
+
+def process_h5_to_graphs(h5_path, output_dir, chunk_size=10000, radius=0.4, wrap_phi=False):
     """
-    Converts LHCO 2020 H5 events into PyTorch Geometric graphs.
-    Each event becomes a graph where nodes are particles.
+    Converts LHCO 2020 H5 events into PyTorch Geometric radius graphs (ΔR <= radius),
+    streaming `chunk_size` events at a time so the full file never sits in memory.
+
+    Writes `data_chunk_{c}.pt` (one graph per event, in file order, so global index
+    i lives in chunk i // chunk_size) and `labels.npy` (truth label per event,
+    0: QCD, 1: W'), which training uses to select background-only events.
     """
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     print(f"📖 Reading {h5_path}...")
-    with h5py.File(h5_path, 'r') as f:
-        # Accessing the event matrix
-        data = f['df']['block0_values'][:]
-        
-        # Total events (usually 1.1 million in R&D set)
-        num_events = data.shape[0]
-        num_chunks = int(np.ceil(num_events / chunk_size))
+    h5_file, dset = open_events(h5_path)
+    with h5_file:
+        num_events = dset.shape[0]
+        labels = np.empty(num_events, dtype=np.int8)
 
-        for c in range(num_chunks):
+        for start in tqdm(range(0, num_events, chunk_size), desc='Chunks'):
+            block = dset[start:min(start + chunk_size, num_events)]
             chunk_graphs = []
-            start, end = c * chunk_size, min((c + 1) * chunk_size, num_events)
-            
-            for i in range(start, end):
-                event = data[i]
-                # Last element is the Truth Label (0: QCD, 1: W')
-                label = event[-1]
-                
-                # Reshape particles: (Up to 700 particles, 3 features each)
-                particles = event[:-1].reshape(-1, 3)
-                # Remove zero-padded particles
-                mask = particles[:, 0] > 0
-                nodes = torch.tensor(particles[mask], dtype=torch.float)
-                
-                # Create a fully connected graph (simplest for LHC anomalies)
-                # For high-speed training, we can also use Radius Graphs
-                num_nodes = nodes.shape[0]
-                edge_index = torch.combinations(torch.arange(num_nodes), r=2).t()
-                
-                graph = Data(x=nodes, edge_index=edge_index, y=torch.tensor([label]))
+
+            for offset, event in enumerate(block):
+                label = int(event[LABEL_COLUMN])
+                labels[start + offset] = label
+
+                graph = create_radius_graph(event, radius=radius, wrap_phi=wrap_phi)
+                if graph is None:
+                    # Keep a placeholder so indices stay aligned with the H5 rows
+                    graph = Data(
+                        x=torch.zeros((1, 3), dtype=torch.float),
+                        edge_index=torch.empty((2, 0), dtype=torch.long),
+                    )
+                graph.y = torch.tensor([label], dtype=torch.float)
                 chunk_graphs.append(graph)
-            
-            # Save the chunk to the directory specified in your .gitignore
-            torch.save(chunk_graphs, f"{output_dir}/data_chunk_{c}.pt")
-            print(f"✅ Chunk {c} saved ({len(chunk_graphs)} graphs)")
+
+            torch.save(chunk_graphs, os.path.join(output_dir, f"data_chunk_{start // chunk_size}.pt"))
+
+    np.save(os.path.join(output_dir, 'labels.npy'), labels)
+    print(f"✅ Saved {num_events:,} graphs and labels.npy to {output_dir}")
+
 
 if __name__ == "__main__":
-    h5_file = "dataset/raw/events_anomalydetection_v2.h5"
-    out_dir = "dataset/processed"
-    process_h5_to_graphs(h5_file, out_dir)
+    parser = argparse.ArgumentParser(description='Convert LHCO H5 events into radius-graph chunks.')
+    parser.add_argument('--h5', default="dataset/raw/events_anomalydetection_v2.h5")
+    parser.add_argument('--out', default="dataset/processed")
+    parser.add_argument('--chunk-size', type=int, default=10000)
+    parser.add_argument('--radius', type=float, default=0.4)
+    parser.add_argument('--wrap-phi', action='store_true')
+    args = parser.parse_args()
+    process_h5_to_graphs(args.h5, args.out, args.chunk_size, args.radius, args.wrap_phi)
