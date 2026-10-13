@@ -96,7 +96,8 @@ Findings:
    inversion is not explained by multiplicity alone and its cause is not established.
 2. **Within bins of HT, multiplicity and leading pT, the scores do not recover the signal.** Within-bin AUC ranges
    (seed-averaged): Chamfer HT 0.31–0.56, multiplicity 0.41–0.48, leading pT 0.40–0.44; kNN 0.28–0.54, 0.43–0.50,
-   0.38–0.45; GMM 0.31–0.57, 0.47–0.51, 0.40–0.50. Within multiplicity bins the scores are near chance, and within HT
+   0.38–0.45; GMM 0.31–0.57, 0.47–0.51, 0.40–0.50. Within multiplicity bins the scores are near chance for GMM, mostly near chance for kNN (lowest bins 0.43–0.45) and
+   mildly inverted for Chamfer (0.41–0.48), and within HT
    bins they carry *inverted* information (AUC 0.28–0.31 at the low end), so at fixed multiplicity or HT the model
    does not separate signal in the right direction.
 3. **The three scores disagree with each other** (seed 0 Spearman: Chamfer–kNN 0.53, Chamfer–GMM 0.42, kNN–GMM
@@ -167,7 +168,7 @@ Recommended next steps, in order of expected value (spec fallback: "adding jet-s
    jet-feature AE reference row. The label-free τ21 score alone reaches 0.801.
 2. **Remove the complexity shortcut**: condition the model on, or regress out, multiplicity and HT/mean pT, so the
    remaining score measures structure at fixed complexity. The within-bin results show this is where the current
-   model has no information.
+   model has no information in the right direction (near chance or inverted).
 3. Treat the score's sign as a design choice made on background-only or simulated data, not after seeing test labels.
 
 ## 8. Deviations from the spec and plan
