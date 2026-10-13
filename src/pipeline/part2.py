@@ -215,8 +215,12 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     # The scores file is written last: it is the "run finished" marker (skip logic, scripts/part2_sweep.py).
     # Atomic (np.savez appends .npz to names lacking it, and the temp name must not match the scores_s*.npz glob).
     tmp_scores = os.path.join(run_dir, f'tmp_scores_s{seed}.npz')
-    np.savez(tmp_scores, labels=y, **scores)
-    os.replace(tmp_scores, scores_path)
+    try:
+        np.savez(tmp_scores, labels=y, **scores)
+        os.replace(tmp_scores, scores_path)
+    finally:
+        if os.path.exists(tmp_scores):
+            os.remove(tmp_scores)
     stale = os.path.join(run_dir, f'failed_s{seed}.json')
     if os.path.exists(stale):
         os.remove(stale)

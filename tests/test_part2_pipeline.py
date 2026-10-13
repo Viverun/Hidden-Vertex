@@ -167,3 +167,17 @@ def test_density_scorer_fit_guard_is_an_explicit_raise(tiny_cfg, monkeypatch):
     monkeypatch.setattr(part2, 'fit_scorers', lambda *a, **k: {**real(*a, **k), 'knn': Wrong()})
     with pytest.raises(RuntimeError, match='training latents'):
         run_training(tiny_cfg, seed=0, tag='main')
+
+
+def test_partial_scores_write_leaves_no_temp_or_scores_file(tiny_cfg, monkeypatch):
+    prepare_cache(tiny_cfg)
+
+    def partial(path, *args, **kwargs):
+        with open(path, 'wb') as handle:
+            handle.write(b'partial')
+        raise OSError('disk full')
+    monkeypatch.setattr('src.pipeline.part2.np.savez', partial)
+    with pytest.raises(OSError):
+        run_training(tiny_cfg, seed=0, tag='main')
+    run_dir = os.path.join(tiny_cfg['output_dir'], 'runs', 'main')
+    assert not [f for f in os.listdir(run_dir) if f.endswith('.npz')]

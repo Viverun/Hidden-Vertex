@@ -40,6 +40,27 @@ def build_jobs(stage):
     return [(tag, seed, list(overrides)) for tag, overrides, seeds in GRIDS[stage] for seed in seeds]
 
 
+def summarize_stage(output_dir, stage):
+    """Summary rows of the finished runs of a stage. The scores file is the "run finished" marker (written
+    last), so a metrics file without it is ignored; an unreadable metrics file is skipped with a warning."""
+    rows = []
+    for tag, _, seeds in GRIDS[stage]:
+        for seed in seeds:
+            run_dir = os.path.join(output_dir, 'runs', tag)
+            metrics_path = os.path.join(run_dir, f'metrics_s{seed}.json')
+            if not (os.path.exists(metrics_path) and os.path.exists(os.path.join(run_dir, f'scores_s{seed}.npz'))):
+                continue
+            try:
+                with open(metrics_path, encoding='utf-8') as handle:
+                    m = json.load(handle)
+                rows.append({'tag': tag, 'seed': seed, **{f'auc_{k}': round(v, 4) for k, v in m['auc'].items()},
+                             'epochs': m['epochs_run'], 'sec_per_epoch': round(m['seconds_per_epoch'], 1),
+                             'params': m['num_parameters']})
+            except (OSError, ValueError, KeyError, TypeError) as err:
+                print(f'WARNING: skipping unreadable metrics {metrics_path}: {err}', flush=True)
+    return rows
+
+
 def gpu_count():
     try:
         import torch
@@ -108,16 +129,7 @@ def main():
             log.close()
 
     # Summary of every finished run of this stage (including runs from earlier launches)
-    rows = []
-    for tag, _, seeds in GRIDS[args.stage]:
-        for seed in seeds:
-            path = os.path.join(output_dir, 'runs', tag, f'metrics_s{seed}.json')
-            if os.path.exists(path):
-                with open(path, encoding='utf-8') as handle:
-                    m = json.load(handle)
-                rows.append({'tag': tag, 'seed': seed, **{f'auc_{k}': round(v, 4) for k, v in m['auc'].items()},
-                             'epochs': m['epochs_run'], 'sec_per_epoch': round(m['seconds_per_epoch'], 1),
-                             'params': m['num_parameters']})
+    rows = summarize_stage(output_dir, args.stage)
     if rows:
         with open(os.path.join(output_dir, f'sweep_{args.stage}.csv'), 'w', newline='', encoding='utf-8') as handle:
             writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
