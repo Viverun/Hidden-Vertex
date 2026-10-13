@@ -7,7 +7,7 @@ Predecessor: `docs/PART1_VERIFICATION.md` (Part 1 baseline verified, AUC 0.483 �
 
 Build an **unsupervised, event-level** anomaly detector for the LHC Olympics 2020 R&D data and measure it honestly against simple label-free baselines.
 
-**Success:** the 3-seed mean ROC-AUC of at least one of the model's three scores has a bootstrap lower bound **above the best label-free baseline** (Σ pT ≈ 0.79) on the frozen test set. Because the best of three scores is taken, the bound uses a Bonferroni-adjusted 98.3% interval instead of 95%. In addition, within-bin AUC (bins of HT, multiplicity, leading pT) stays above ~0.6, so the score carries information beyond event composition. Approaching the jet-substructure scores (−τ21 0.80, −|mjj−3500| 0.90) is a stretch goal. Note that −|mjj−3500| needs the signal mass and is not a fair unsupervised target.
+**Success:** the 3-seed mean ROC-AUC of at least one of the model's three scores has a bootstrap lower bound **above the best particle-level baseline** (HT, mean pT, leading pT, multiplicity, m_all; best is Σ pT ≈ 0.79) on the frozen test set. Jet-level baselines (mjj, τ21, jet masses) and the oracle −|mjj−3500| are reported but are not the bar, because the model never sees clustered jets. Because the best of three scores is taken, the bound uses a Bonferroni-adjusted 98.3% interval instead of 95%. In addition, within-bin AUC (bins of HT, multiplicity, leading pT) stays above ~0.6, so the score carries information beyond event composition. Approaching the jet-substructure scores (−τ21 0.80, −|mjj−3500| 0.90) is a stretch goal. Note that −|mjj−3500| needs the signal mass and is not a fair unsupervised target.
 
 **If the gate fails,** the deliverable is the diagnosis (what each score correlates with, as in Part 1) and a recommendation for the next step (for example, jet-substructure inputs). This outcome counts as a result and is decided now, not after the fact.
 
@@ -24,7 +24,7 @@ Each unit has one purpose and a narrow interface. The benchmark harness knows no
 
 | File | Purpose | Depends on |
 |---|---|---|
-| `src/benchmarks/baselines.py` | Label-free event scores: Σ pT (HT), mean pT per particle, multiplicity, HT/multiplicity, invariant mass of all particles; jet scores (mjj, τ21, jet masses) read from `.features.h5` | particle arrays |
+| `src/benchmarks/baselines.py` | Label-free event scores: Σ pT (HT), mean pT per particle (= HT / multiplicity), leading-particle pT, multiplicity, invariant mass of all particles; jet scores (mjj, τ21, jet masses) read from `.features.h5` | particle arrays |
 | `src/benchmarks/report.py` | Any per-event scores + labels → AUC, bootstrap 95% CI, AUC within HT / multiplicity / leading-pT bins; writes JSON and Markdown | numpy, sklearn |
 | `src/data/event_features.py` | Per-particle features: log pT, η, φ, log E, pT/HT, Δη and Δφ to the leading particle (φ wrapped) | particle arrays |
 | `src/data/oracle_split.py` (extend) | Frozen test set; disjoint train rows; contaminated-mix mode; larger train sizes; compact particle-array cache | existing |
@@ -32,6 +32,8 @@ Each unit has one purpose and a narrow interface. The benchmark harness knows no
 | `src/training/set_loss.py` | Symmetric Chamfer loss with masking (and pT-weighted variant for ablation) | torch |
 | `src/utils/latent_scores.py` | Fit on training latents only: kNN distance, Gaussian-mixture log-likelihood | sklearn |
 | `scripts/part2_run.py` + `configs/part2_*.yaml` | One entry point: split, train, latents, all scores, benchmark; also the contamination run | all of the above |
+| `src/pipeline/part2.py` | Library behind the entry point (prepare cache, train one run, build score bank, make report), so it can be tested without the CLI; `scripts/part2_run.py` is argparse only | all of the above |
+| `scripts/kaggle_bundle.py` + `scripts/kaggle/part2_*.py` | Bundle the repo into a Kaggle script kernel; one small body file per stage | — |
 | `scripts/part2_sweep.py` | Ablation runner with per-run result files, skip-if-exists | part2_run |
 
 Reused from Part 1: `oracle_split.py`, `transforms.py`, seeding, the sweep-runner pattern, the Kaggle bundling pattern.
@@ -39,10 +41,10 @@ Reused from Part 1: `oracle_split.py`, `transforms.py`, seeding, the sweep-runne
 ## 4. Data flow and model
 
 **Data.**
-- Test set frozen to Part 1's 5,000 background + 5,000 signal events (comparable numbers). Signal test rows are 1,000,000–1,004,999 in `events_anomalydetection_v2.h5` (sorted file; needs `scan_limit: null`).
-- Train: 200k pure-background events from rows disjoint from the test rows. A 10% slice is held out as a background-only validation set for early stopping; signal is never used for model selection.
-- Contamination run: train mix of background plus ~9% signal (and a second run at ~1%), with signal drawn from rows *after* the test rows, so there is no leakage.
-- Storage: compact particle arrays (~400 MB for 200k events), not saved graphs (edge lists would be ~17 GB). Dense padded tensors `[batch, particles, features]` plus a mask. The ΔR < 0.4 adjacency (φ wrapped) is built on the GPU per batch. This replaces PyG for Part 2 and is the largest departure from Part 1.
+- Test set frozen to Part 1's 5,000 background + 5,000 signal events (comparable numbers): background rows 40,000–44,999 (Part 1 trained on the first 40,000), signal rows 1,000,000–1,004,999. Part 1 skipped events with fewer than 2 particles, so its rows may differ by a handful; Stage 0 reproducing HT 0.792 confirms the sets match. Signal test rows are 1,000,000–1,004,999 in `events_anomalydetection_v2.h5` (sorted file; needs `scan_limit: null`).
+- Train: 200k pure-background events from rows 45,000 onward (disjoint from the test rows). The last 10% of them (20k) is held out as a background-only validation set for early stopping; signal is never used for model selection.
+- Contamination run: the 180k training events become background plus ~9% signal (and a second run at ~1%), with signal drawn from rows 1,005,000 onward (after the test rows, so no leakage). The 20k validation slice stays pure background in every run.
+- Storage: compact particle arrays (pT-sorted, zero-padded to `max_particles`, default 300; roughly 0.7 GB for 200k events), not saved graphs (edge lists would be ~17 GB). Event-level baseline quantities (HT, multiplicity, m_all, ...) are computed from the full untruncated rows at prep time. Prep fails if more than 2% of events exceed `max_particles`. Dense padded tensors `[batch, particles, features]` plus a mask, held on the GPU. The ΔR < 0.4 adjacency (φ wrapped) is built on the GPU per batch. This replaces PyG for Part 2 and is the largest departure from Part 1.
 
 **Encoder.** 3 message-passing layers, width 64, neighbour averaging over ΔR < 0.4, residual connections. Event pooling by mean, max and pT-weighted sum, then an MLP to z (default 16; configurable 4–32).
 
@@ -59,8 +61,8 @@ Reused from Part 1: `oracle_split.py`, `transforms.py`, seeding, the sweep-runne
 
 | Stage | What | Gate |
 |---|---|---|
-| 0. Harness | Benchmark table on the frozen test set: HT, mean pT, multiplicity, HT/multiplicity, mjj, τ21, mj1/mj2, Part 1 max and mean scores (the jet-feature AE reference row is added after Stage 1, since it needs a trained model) | Must reproduce verified Part 1 numbers (HT 0.792, mjj 0.788, Part 1 max ~0.48, mean ~0.78) within their CIs. If not, the harness is wrong and nothing else is trusted. |
-| 1. Main run | Train `EventAE` on 200k pure background, 3 seeds; all 3 scores with bootstrap CIs; within-bin AUC | Section 1 success criterion |
+| 0. Harness | Benchmark table on the frozen test set: HT, mean pT (= HT / multiplicity), leading pT, multiplicity, m_all, mjj, τ21, mj1/mj2, Part 1 max and mean scores (the jet-feature AE reference row is added after Stage 1, since it needs a trained model) | Must reproduce verified Part 1 numbers (HT 0.792, mjj 0.788, Part 1 max ~0.48, mean ~0.78) within their CIs. If not, the harness is wrong and nothing else is trusted. |
+| 1. Main run | Train `EventAE` on 200k pure background, 3 seeds; all 3 scores with bootstrap CIs; within-bin AUC | Section 1 success criterion. The within-bin check is the minimum over all bins of HT, multiplicity and leading pT (seed-averaged) and must be ≥ 0.6. |
 | 2. Ablations | Latent size (4/8/16/32), reconstructed particles K (24/48/96), encoder depth, with/without pT-weighted pooling, plain vs pT-weighted loss; 2 seeds each | Sensitivity analysis only |
 | 3. Contamination | Retrain with 9% and 1% signal in training | Report AUC drop vs the pure run |
 
@@ -101,6 +103,6 @@ Total about 5 GPU-hours. Each kernel gets a `-t` timeout. Each run writes metric
 ## 9. Risks and open points
 
 - Clearing 0.79 unsupervised is uncertain (see Section 1). The diagnosis path is the planned fallback.
-- The HT/multiplicity baseline is untested; Stage 0 settles whether the Part 1 mean score is just average particle hardness.
+- The mean-pT (= HT / multiplicity) baseline is untested; Stage 0 settles whether the Part 1 mean score is just average particle hardness.
 - Epoch time for 200k events with dense adjacency is unmeasured. The smoke run decides the epoch budget.
 - Chamfer with K = 48 ignores soft particles by design; the K ablation checks that this choice is not what limits performance.
