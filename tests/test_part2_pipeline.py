@@ -11,6 +11,7 @@ from src.pipeline.part2 import (
     make_report,
     parse_external,
     prepare_cache,
+    run_training,
 )
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,3 +64,51 @@ def test_bank_rejects_external_with_different_labels(tiny_cfg, tmp_path):
     np.savez(bad, scores=np.zeros(60), labels=np.zeros(60))
     with pytest.raises(ValueError, match='labels'):
         build_bank(tiny_cfg, externals=[f'Bad={bad}:scores'])
+
+
+def test_run_training_writes_scores_and_skips_existing(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    metrics = run_training(tiny_cfg, seed=0, tag='main')
+    run_dir = os.path.join(tiny_cfg['output_dir'], 'runs', 'main')
+    scores = np.load(os.path.join(run_dir, 'scores_s0.npz'))
+    assert set(scores.files) == {'chamfer', 'knn', 'gmm', 'labels'}
+    assert all(scores[k].shape == (60,) and np.isfinite(scores[k]).all() for k in ('chamfer', 'knn', 'gmm'))
+    assert scores['labels'].tolist() == [0] * 30 + [1] * 30
+    assert set(metrics['auc']) == {'chamfer', 'knn', 'gmm'} and metrics['n_contaminating_signal'] == 0
+    assert metrics['n_fit'] == 90 and metrics['num_parameters'] > 0
+    mtime = os.path.getmtime(os.path.join(run_dir, 'scores_s0.npz'))
+    assert run_training(tiny_cfg, seed=0, tag='main')['auc'] == metrics['auc']
+    assert os.path.getmtime(os.path.join(run_dir, 'scores_s0.npz')) == mtime
+
+
+def test_contamination_run_replaces_training_events_with_signal(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    metrics = run_training(tiny_cfg, seed=1, contamination=0.1, tag='contam')
+    assert metrics['n_contaminating_signal'] == 9 and metrics['n_fit'] == 90
+
+
+def test_contamination_larger_than_cache_raises(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    with pytest.raises(ValueError, match='contamination'):
+        run_training(tiny_cfg, seed=0, contamination=0.5, tag='too_much')
+
+
+def test_unknown_loss_raises(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    tiny_cfg['training']['loss'] = 'chamfer_typo'
+    with pytest.raises(ValueError, match='loss'):
+        run_training(tiny_cfg, seed=0, tag='bad_loss')
+    assert not os.path.exists(os.path.join(tiny_cfg['output_dir'], 'runs', 'bad_loss', 'scores_s0.npz'))
+
+
+def test_full_report_with_model_rows_and_gate(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    for seed in (0, 1):
+        run_training(tiny_cfg, seed=seed, tag='main')
+    bank = build_bank(tiny_cfg)
+    out = make_report(tiny_cfg, bank, run_tags=['main'], name='final')
+    names = {r['name'] for r in out['rows']}
+    assert {'EventAE chamfer', 'EventAE knn', 'EventAE gmm'} <= names
+    assert out['gate'] is not None and out['gate']['bar_name'] in {
+        'HT (sum pT)', 'mean pT per particle', 'leading pT', '-multiplicity', 'm_all'}
+    assert next(r for r in out['rows'] if r['name'] == 'EventAE knn')['notes'] == '2 seed(s)'
