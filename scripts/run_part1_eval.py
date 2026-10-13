@@ -61,7 +61,7 @@ def load_or_build_split(config):
     )
 
 
-def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra=None):
+def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra=None, scores_by_reduction=None):
     model_path = config['evaluation']['model_path']
     metrics_path = config['evaluation']['metrics_path']
     roc_path = config['evaluation']['roc_path']
@@ -91,7 +91,8 @@ def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, ex
     scores_path = config['evaluation'].get('scores_path')
     if scores_path:
         ensure_parent_dir(scores_path)
-        np.savez(scores_path, scores=np.asarray(y_scores), labels=np.asarray(test_labels))
+        np.savez(scores_path, scores=np.asarray(y_scores), labels=np.asarray(test_labels),
+                 **{f'scores_{r}': np.asarray(s) for r, s in (scores_by_reduction or {}).items()})
         print(f'✓ Saved per-event scores: {scores_path}')
 
     plt.figure(figsize=(10, 6))
@@ -187,7 +188,7 @@ def main():
         'hidden_layers': list(config['model']['hidden_layers']),
         'num_parameters': sum(p.numel() for p in model.parameters()),
     }
-    save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra)
+    save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra, scores_by_reduction)
 
 
 if __name__ == '__main__':

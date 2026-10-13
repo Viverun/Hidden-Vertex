@@ -1,0 +1,57 @@
+# configs/part2_main.yaml  --  headline Part 2 configuration (spec Section 4). Not tuned on test AUC.
+data:
+  h5_path: "dataset/raw/events_anomalydetection_v2.h5"
+  features_path: "dataset/raw/events_anomalydetection_v2.features.h5"
+  cache_dir: "results/part2/cache"
+  max_particles: 300            # padded width; prep fails if > max_truncated_fraction of events exceed it
+  max_truncated_fraction: 0.02
+  radius: 0.4
+  wrap_phi: true
+
+split:
+  skip_bg: 40000                # Part 1 trained on the first 40,000 background events
+  n_test_bg: 5000
+  n_test_sig: 5000
+  n_train: 200000               # background; the last val_fraction of it is the pure validation slice
+  n_contam_sig: 16200           # = 9% of the 180k training events
+  val_fraction: 0.1
+  contamination: 0.0            # fraction of the training events replaced by signal
+
+model:
+  width: 64
+  layers: 3
+  hidden: 128
+  latent_dim: 16
+  k_recon: 48
+  pooling: [mean, max, ptsum]
+
+training:
+  epochs: 30
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  patience: 5
+  grad_clip: 5.0
+  loss: chamfer                 # chamfer | chamfer_ptw
+  collapse_std: 0.0001
+  seed: 0
+
+scores:
+  knn_k: 20
+  gmm_components: 8
+
+benchmark:
+  n_boot: 1000
+  baseline_ci_level: 0.95
+  model_ci_level: 0.983         # Bonferroni for the best-of-three score rule
+  n_bins: 10
+  min_within_bin: 0.6
+  jet_oracle_mass: 3500
+
+stage0_expected:                # verified Part 1 numbers (docs/PART1_VERIFICATION.md)
+  "HT (sum pT)": 0.792
+  "mjj": 0.788
+  "Part 1 AE (max)": 0.478
+  "Part 1 AE (mean)": 0.781
+
+output_dir: "results/part2"
