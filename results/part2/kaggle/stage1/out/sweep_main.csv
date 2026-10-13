@@ -1,0 +1,4 @@
+tag,seed,auc_chamfer,auc_knn,auc_gmm,epochs,sec_per_epoch,params
+main,0,0.4194,0.4049,0.4483,30,34.3,95888
+main,1,0.4327,0.3971,0.4267,30,34.2,95888
+main,2,0.4321,0.4007,0.434,30,34.2,95888

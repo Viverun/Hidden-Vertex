@@ -1,0 +1,62 @@
+[
+  {
+    "name": "HT (sum pT)",
+    "group": "particle",
+    "notes": "more energy = anomalous"
+  },
+  {
+    "name": "mean pT per particle",
+    "group": "particle",
+    "notes": "= HT / multiplicity"
+  },
+  {
+    "name": "leading pT",
+    "group": "particle",
+    "notes": ""
+  },
+  {
+    "name": "-multiplicity",
+    "group": "particle",
+    "notes": "fewer particles = anomalous (sign seen on labelled data in Part 1)"
+  },
+  {
+    "name": "m_all",
+    "group": "particle",
+    "notes": "invariant mass of all particles"
+  },
+  {
+    "name": "mjj",
+    "group": "jet",
+    "notes": "dijet invariant mass"
+  },
+  {
+    "name": "mj1",
+    "group": "jet",
+    "notes": "leading jet mass"
+  },
+  {
+    "name": "mj2",
+    "group": "jet",
+    "notes": "second jet mass"
+  },
+  {
+    "name": "-tau21 (leading jet)",
+    "group": "jet",
+    "notes": "two-prong substructure"
+  },
+  {
+    "name": "-|mjj-3500| (oracle)",
+    "group": "oracle",
+    "notes": "needs the signal mass; not model independent"
+  },
+  {
+    "name": "Part 1 AE (max)",
+    "group": "external",
+    "notes": "from scores.npz"
+  },
+  {
+    "name": "Part 1 AE (mean)",
+    "group": "external",
+    "notes": "from scores.npz"
+  }
+]

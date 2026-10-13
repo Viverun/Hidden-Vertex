@@ -1,0 +1,26 @@
+{
+  "auc": 0.47833432,
+  "auc_ci95": [
+    0.46723297532757624,
+    0.48879769722591915
+  ],
+  "seed": 0,
+  "score_reduction": "max",
+  "num_test_events": 10000,
+  "num_signal": 5000,
+  "num_background": 5000,
+  "mean_score": 6.0669732093811035,
+  "std_score": 1.6279891729354858,
+  "auc_by_reduction": {
+    "max": 0.47833432,
+    "mean": 0.78098428
+  },
+  "final_train_loss": 0.5067885455432212,
+  "loss_mode": "pt_only",
+  "latent_dim": 1,
+  "hidden_layers": [
+    16,
+    8
+  ],
+  "num_parameters": 420
+}

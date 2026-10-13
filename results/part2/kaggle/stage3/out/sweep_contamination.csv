@@ -1,0 +1,3 @@
+tag,seed,auc_chamfer,auc_knn,auc_gmm,epochs,sec_per_epoch,params
+contam9,0,0.4129,0.3623,0.387,30,36.5,95888
+contam1,0,0.4243,0.4201,0.4611,30,34.6,95888
