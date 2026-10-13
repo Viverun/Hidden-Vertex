@@ -3,7 +3,7 @@ data:
   h5_path: "dataset/raw/events_anomalydetection_v2.h5"
   features_path: "dataset/raw/events_anomalydetection_v2.features.h5"
   cache_dir: "results/part2/cache"
-  max_particles: 300            # padded width; prep fails if > max_truncated_fraction of events exceed it
+  max_particles: 350            # padded width; set from measured multiplicity (bg: 0.7% > 350, sig: 0.02%); prep fails if > max_truncated_fraction exceed it
   max_truncated_fraction: 0.02
   radius: 0.4
   wrap_phi: true
