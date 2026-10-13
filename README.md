@@ -252,12 +252,27 @@ sub-0.5 AUC. This motivates Phase 2: an event-level bottleneck and jet/substruct
 * ✓ Node-level 1D-bottleneck GNN autoencoder
 * ✓ Oracle dataset purification
 
-### 🔄 Phase 2: Global Event Learning (In Progress)
+### ✅ Phase 2: Global Event Learning (Complete, negative result)
 
-* ⏳ Global graph pooling (`global_mean_pool`) for invariant mass sensitivity
-* ⏳ Event-level latent bottleneck replacing per-node-only logic
-* ⏳ Richer kinematics for resonance-aware learning
-* ⏳ Latent manifold analysis and 2D visualization
+An event-level graph autoencoder (dense padded tensors, Chamfer loss, three scores: reconstruction error,
+latent kNN distance, latent Gaussian-mixture likelihood) was built together with a model-agnostic benchmark
+harness, run on Kaggle (3 seeds, 18 ablation runs, 2 contamination runs) and evaluated against label-free
+baselines. **It did not pass its pre-registered gate:** the best particle-level baseline, mean pT per particle,
+scores AUC 0.811, while the model's scores are inverted (AUC 0.40-0.44), because signal events here are
+lower-multiplicity and harder than QCD background and look *more* typical to the model. Full write-up:
+[`docs/PART2_RESULTS.md`](docs/PART2_RESULTS.md); design: `docs/superpowers/specs/`.
+
+```bash
+python scripts/part2_run.py prepare --config configs/part2_main.yaml     # event cache
+python scripts/part2_run.py bank --config configs/part2_main.yaml        # baselines on the frozen test set
+python scripts/part2_sweep.py --stage main --config configs/part2_main.yaml   # 3 seeds
+python scripts/part2_run.py report --tags main --name stage1             # benchmark table + gate
+```
+
+### 🔜 Phase 3: Jet-Aware, Complexity-Controlled Learning (Next)
+
+* ⏳ Jet-level inputs (jet masses, tau21, mjj) alongside particle features
+* ⏳ Condition on / regress out multiplicity and mean pT so the score measures structure at fixed complexity
 
 ---
 
@@ -267,6 +282,8 @@ sub-0.5 AUC. This motivates Phase 2: an event-level bottleneck and jet/substruct
 | ---------- | ---------------------------------------- |
 | Kaggle Hub | Access pretrained weights & architecture |
 | Notebook   | Step-by-step training walkthrough        |
+| `docs/PART1_VERIFICATION.md` | Part 1 audit: verified numbers, data-file gotchas, capacity sweep |
+| `docs/PART2_RESULTS.md` | Part 2 results: benchmark table, diagnosis, ablations, next steps |
 
 ---
 
