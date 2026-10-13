@@ -157,6 +157,10 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     cache = d['cache_dir']
     train_bg, contam = load_role(cache, 'train_bg'), load_role(cache, 'contam_sig')
     test_bg, test_sig = load_role(cache, 'test_bg'), load_role(cache, 'test_sig')
+    if len(train_bg.rows) != s['n_train']:
+        raise ValueError(f"cache {cache} holds {len(train_bg.rows)} training events but split.n_train is "
+                         f"{s['n_train']}: the cache does not match the config (re-run prepare or use another "
+                         'cache_dir)')
     n_val = int(round(s['val_fraction'] * s['n_train']))
     n_fit = s['n_train'] - n_val
     n_sig = int(round(contamination * n_fit))
@@ -189,16 +193,17 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     chamfer_test, z_test = infer(model, test_t, ctx)
     _, z_fit = infer(model, fit_t, ctx)
     scorers = fit_scorers(z_fit, cfg['scores']['knn_k'], cfg['scores']['gmm_components'], seed)
-    assert all(sc.n_fit == len(fit_np) for sc in scorers.values()), 'density scorers must be fit on training latents only'
+    if not all(sc.n_fit == len(fit_np) for sc in scorers.values()):
+        raise RuntimeError('density scorers must be fit on training latents only '
+                           f'(expected n_fit={len(fit_np)})')
     scores = {'chamfer': chamfer_test, 'knn': scorers['knn'].score(z_test), 'gmm': scorers['gmm'].score(z_test)}
 
-    np.savez(scores_path, labels=y, **scores)
     torch.save({'model_state_dict': model.state_dict(), 'config': cfg}, os.path.join(run_dir, f'model_s{seed}.pt'))
     metrics = {
         'tag': tag, 'seed': seed, 'contamination': contamination, 'n_contaminating_signal': n_sig,
         'n_fit': int(len(fit_np)), 'n_val': int(len(val_np)),
         'auc': {k: float(roc_auc_score(y, v)) for k, v in scores.items()},
-        'epochs_run': len(history), 'final_val_loss': history[-1]['val_loss'],
+        'epochs_run': len(history), 'last_epoch_val_loss': history[-1]['val_loss'],
         'best_val_loss': min(h['val_loss'] for h in history),
         'seconds_per_epoch': float(np.mean([h['seconds'] for h in history])),
         'seconds_total': round(time.time() - started, 1),
@@ -207,5 +212,13 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     }
     with open(metrics_path, 'w', encoding='utf-8') as handle:
         json.dump(metrics, handle, indent=2)
+    # The scores file is written last: it is the "run finished" marker (skip logic, scripts/part2_sweep.py).
+    # Atomic (np.savez appends .npz to names lacking it, and the temp name must not match the scores_s*.npz glob).
+    tmp_scores = os.path.join(run_dir, f'tmp_scores_s{seed}.npz')
+    np.savez(tmp_scores, labels=y, **scores)
+    os.replace(tmp_scores, scores_path)
+    stale = os.path.join(run_dir, f'failed_s{seed}.json')
+    if os.path.exists(stale):
+        os.remove(stale)
     print(f"run {tag}/s{seed}: AUC {metrics['auc']}", flush=True)
     return metrics

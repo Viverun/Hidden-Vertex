@@ -112,3 +112,58 @@ def test_full_report_with_model_rows_and_gate(tiny_cfg):
     assert out['gate'] is not None and out['gate']['bar_name'] in {
         'HT (sum pT)', 'mean pT per particle', 'leading pT', '-multiplicity', 'm_all'}
     assert next(r for r in out['rows'] if r['name'] == 'EventAE knn')['notes'] == '2 seed(s)'
+
+
+def test_scores_file_is_written_last_as_the_run_finished_marker(tiny_cfg, monkeypatch):
+    prepare_cache(tiny_cfg)
+
+    def boom(*args, **kwargs):
+        raise OSError('disk full')
+    monkeypatch.setattr('src.pipeline.part2.np.savez', boom)
+    with pytest.raises(OSError):
+        run_training(tiny_cfg, seed=0, tag='main')
+    run_dir = os.path.join(tiny_cfg['output_dir'], 'runs', 'main')
+    assert os.path.exists(os.path.join(run_dir, 'metrics_s0.json'))
+    assert os.path.exists(os.path.join(run_dir, 'model_s0.pt'))
+    assert not os.path.exists(os.path.join(run_dir, 'scores_s0.npz'))
+
+
+def test_metrics_report_last_epoch_and_best_val_loss(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    metrics = run_training(tiny_cfg, seed=0, tag='main')
+    assert 'final_val_loss' not in metrics
+    assert metrics['last_epoch_val_loss'] == metrics['history'][-1]['val_loss']
+    assert metrics['best_val_loss'] == min(h['val_loss'] for h in metrics['history'])
+
+
+def test_cache_not_matching_n_train_raises(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    tiny_cfg['split']['n_train'] = 90
+    with pytest.raises(ValueError, match='cache'):
+        run_training(tiny_cfg, seed=0, tag='main')
+    assert not os.path.exists(os.path.join(tiny_cfg['output_dir'], 'runs', 'main', 'scores_s0.npz'))
+
+
+def test_stale_failed_file_is_removed_after_success(tiny_cfg):
+    prepare_cache(tiny_cfg)
+    run_dir = os.path.join(tiny_cfg['output_dir'], 'runs', 'main')
+    os.makedirs(run_dir)
+    failed = os.path.join(run_dir, 'failed_s0.json')
+    with open(failed, 'w', encoding='utf-8') as handle:
+        json.dump({'seed': 0, 'tag': 'main', 'reason': 'old failure'}, handle)
+    run_training(tiny_cfg, seed=0, tag='main')
+    assert not os.path.exists(failed)
+    assert os.path.exists(os.path.join(run_dir, 'scores_s0.npz'))
+
+
+def test_density_scorer_fit_guard_is_an_explicit_raise(tiny_cfg, monkeypatch):
+    import src.pipeline.part2 as part2
+    prepare_cache(tiny_cfg)
+    real = part2.fit_scorers
+
+    class Wrong:
+        n_fit = 1
+
+    monkeypatch.setattr(part2, 'fit_scorers', lambda *a, **k: {**real(*a, **k), 'knn': Wrong()})
+    with pytest.raises(RuntimeError, match='training latents'):
+        run_training(tiny_cfg, seed=0, tag='main')

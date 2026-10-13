@@ -15,6 +15,8 @@ from .dataset import LABEL_COLUMN, NUM_PARTICLE_COLUMNS, open_events
 from .event_features import SUMMARY_KEYS, particle_summary
 
 ROLES = ('train_bg', 'test_bg', 'test_sig', 'contam_sig')
+BUILD_ORDER = ('test_bg', 'test_sig', 'contam_sig', 'train_bg')   # small roles first: a failing guard fails fast
+PERCENTILES = (50, 90, 95, 99, 100)
 ROLE_LABEL = {'train_bg': 0, 'test_bg': 0, 'test_sig': 1, 'contam_sig': 1}
 
 
@@ -110,8 +112,28 @@ def build_role(h5_path, rows, max_particles, expected_label=None, block=10000):
 
 
 def save_role(path, es):
-    np.savez(path, particles=es.particles, rows=es.rows, labels=es.labels,
-             **{f'summary_{k}': v for k, v in es.summary.items()})
+    """Atomic: writes `<role>.tmp.npz` next to the target (np.savez appends .npz to other names), then renames."""
+    base = path[:-len('.npz')] if path.endswith('.npz') else path
+    tmp = f'{base}.tmp.npz'
+    try:
+        np.savez(tmp, particles=es.particles, rows=es.rows, labels=es.labels,
+                 **{f'summary_{k}': v for k, v in es.summary.items()})
+        os.replace(tmp, f'{base}.npz')
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def multiplicity_percentiles(es):
+    """{50: .., 90: .., ...} of the true (pre-truncation) particle multiplicity of a role."""
+    if len(es.rows) == 0:
+        return {q: 0.0 for q in PERCENTILES}
+    values = np.percentile(es.summary['multiplicity'], PERCENTILES)
+    return {q: float(v) for q, v in zip(PERCENTILES, values)}
+
+
+def _format_percentiles(pct):
+    return ' '.join(f'p{q}={v:.0f}' for q, v in pct.items())
 
 
 def load_role(cache_dir, role):
@@ -123,30 +145,38 @@ def load_role(cache_dir, role):
 
 
 def build_cache(h5_path, cache_dir, split, max_particles, max_truncated_fraction=0.02):
-    """Builds `<cache_dir>/<role>.npz` for every role (skipping existing ones) and returns the plan."""
+    """Builds `<cache_dir>/<role>.npz` for every role (skipping existing ones) and returns the plan.
+
+    Roles are built in BUILD_ORDER (small ones first). cache_meta.json is written only just before the
+    first role file is saved, so a guard failure on a fresh directory leaves nothing behind.
+    """
     os.makedirs(cache_dir, exist_ok=True)
     meta = {'split': dict(split), 'max_particles': max_particles}
     meta_path = os.path.join(cache_dir, 'cache_meta.json')
     if os.path.exists(meta_path):
-        with open(meta_path) as f:
+        with open(meta_path, encoding='utf-8') as f:
             stored = json.load(f)
         if stored != meta:
             raise RuntimeError(f'{cache_dir} was built with different split/max_particles settings; '
-                               'use another cache_dir or delete it')
-    else:
-        with open(meta_path, 'w') as f:
-            json.dump(meta, f)
+                               f'use another cache_dir or delete {cache_dir} and re-run')
     labels = read_labels(h5_path, os.path.join(cache_dir, 'labels.npy'))
     plan = plan_rows(labels, **split)
-    for role in ROLES:
+    for role in BUILD_ORDER:
         path = os.path.join(cache_dir, f'{role}.npz')
         if os.path.exists(path):
             continue
         es = build_role(h5_path, plan[role], max_particles, ROLE_LABEL[role])
         frac = float((es.summary['multiplicity'] > max_particles).mean()) if len(es.rows) else 0.0
-        print(f'{role}: {len(es.rows)} events, {frac:.2%} truncated at {max_particles} particles', flush=True)
+        pct = _format_percentiles(multiplicity_percentiles(es))
+        print(f'{role}: {len(es.rows)} events, {frac:.2%} truncated at {max_particles} particles; '
+              f'multiplicity {pct}', flush=True)
         if frac > max_truncated_fraction:
             raise RuntimeError(f'{role}: {frac:.2%} of events are truncated at max_particles={max_particles} '
-                               f'(limit {max_truncated_fraction:.0%}); raise data.max_particles')
+                               f'(limit {max_truncated_fraction:.0%}); multiplicity percentiles {pct}; '
+                               f'raise data.max_particles, or delete {cache_dir} before re-running '
+                               'with a different max_particles')
+        if not os.path.exists(meta_path):
+            with open(meta_path, 'w', encoding='utf-8') as f:
+                json.dump(meta, f)
         save_role(path, es)
     return plan
