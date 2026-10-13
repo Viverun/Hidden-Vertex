@@ -28,6 +28,7 @@ parser.add_argument("--scores", default="results/scores/part1_scores.npz")
 parser.add_argument("--features", default=None, help="events_anomalydetection_v2.features.h5 (optional)")
 parser.add_argument("--out", default="results/scores/part1_diagnostics.json")
 parser.add_argument("--epochs", type=int, default=5)
+parser.add_argument("--skip-ablations", action="store_true")
 args = parser.parse_args()
 
 OUT = {}
@@ -70,9 +71,13 @@ for c in ["multiplicity", "max_pt", "HT"]:
     log(f"spearman(score,{c})", {"all": round(float(spearmanr(sc, fe[c]).correlation), 3),
                                  "bg": round(float(spearmanr(sc[y == 0], fe[c][y == 0]).correlation), 3),
                                  "sig": round(float(spearmanr(sc[y == 1], fe[c][y == 1]).correlation), 3)})
-for c in ["multiplicity", "max_pt"]:
+for c in ["multiplicity", "max_pt", "HT"]:
     q = pd.qcut(fe[c], 10, labels=False, duplicates="drop").values
     log(f"auc_within_{c}_deciles", [round(roc_auc_score(y[q == k], sc[q == k]), 3) for k in np.unique(q) if len(np.unique(y[q == k])) == 2])
+
+if args.skip_ablations:
+    print("DIAG DONE")
+    sys.exit(0)
 
 # ── Ablations: is the "1D bottleneck" actually the constraint? ───────────────
 mean, std = load_norm_stats(None, dev)

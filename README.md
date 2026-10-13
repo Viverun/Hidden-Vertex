@@ -154,7 +154,11 @@ pure background events only.
 The node-level reconstruction error is slightly **below** random (a weak inverted signal):
 it scores QCD background as marginally more anomalous than the W′ signal.
 
-This is a failure of the *reconstruction-error score*, not of particle-level information:
+How node errors are combined matters more than model size: the same trained model reaches
+**AUC 0.78 with a mean** over particles instead of the max, which is still no better than the Σ pT baseline,
+and a 44× larger model changes nothing (capacity sweep, `docs/PART1_VERIFICATION.md` §5).
+
+The max-error result is a failure of the *reconstruction-error score*, not of particle-level information:
 simple event quantities built from the same particle lists separate well (Σ pT: AUC 0.79,
 fewer particles: 0.72; jet-level −τ21: 0.80).
 

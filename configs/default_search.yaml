@@ -28,6 +28,6 @@ training:
 
 # ─── DISCOVERY SCORING ───────────────────────────────────────────────────────
 evaluation:
-  score_reduction: "max"  # 'max' node error is most sensitive to W' signals
+  score_reduction: "max"  # 'mean' scores ~0.78 AUC vs ~0.48 for 'max' (docs/PART1_VERIFICATION.md §5)
   injection_test: True    # Enable for sensitivity verification
   injection_strength: 3.0 # Log-pT kick used for 1.0 AUC verification

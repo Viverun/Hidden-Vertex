@@ -74,7 +74,46 @@ multiplicity**. These are all event- or jet-level quantities. That supports the 
 latent, jet/substructure-aware inputs). An unsupervised Part 2 model should be benchmarked against HT
 (0.79), since a model that cannot beat Σ pT has not learned anything beyond the energy scale.
 
-## 5. Engineering verification
+## 5. Capacity sweep and score reduction (follow-up, 2026-10-13)
+
+Kaggle runs: `viveriun/hidden-vertex-part1-capacity-sweep` (64 runs, `scripts/part1_capacity_sweep.py`)
+and `viveriun/hidden-vertex-part1-mean-check` (mean vs. max diagnostics). Means over 2 seeds:
+
+| Loss | Width | Params | Train loss | AUC (max) | AUC (mean) |
+|---|---|---|---|---|---|
+| pt_only | 16×8 (Part 1) | 420–539 | 0.500–0.518 | 0.476–0.485 | 0.765–0.786 |
+| pt_only | 32×16 | 1.3k–1.6k | 0.496–0.503 | 0.484–0.490 | 0.789–0.792 |
+| pt_only | 64×32 | 4.7k–5.2k | 0.493–0.495 | 0.481–0.490 | 0.788–0.793 |
+| pt_only | 128×64 | 17.7k–18.6k | 0.493–0.504 | 0.474–0.494 | 0.779–0.795 |
+| weighted, latent 1 | all widths | | 2.10–2.25 | 0.437–0.451 | 0.50–0.55 |
+| weighted, latent 4–8 | all widths | | 1.66–1.78 | 0.474–0.490 | 0.748–0.787 |
+
+Findings:
+
+1. **Scaling the node-level AE does not help.** 44× more parameters lowers the loss by ~2% and leaves AUC flat.
+2. **The bottleneck binds only with the 3-feature loss.** With `weighted`, latent 1 is poor; latent ≥ 4 matches `pt_only`.
+3. **The reduction matters more than the model.** The same trained model scores AUC 0.48 with `max`
+   and **0.78** with `mean`. The old config comment claiming "'max' node error is most sensitive to W' signals"
+   is contradicted by this test.
+
+Is the mean score real or just event composition? (seed 0, 10,000 test events)
+
+| | Mean reduction | Max reduction |
+|---|---|---|
+| AUC | 0.781 [0.772–0.790] | 0.478 [0.467–0.488] |
+| Spearman with multiplicity | −0.71 | −0.07 |
+| Spearman with leading pT | 0.22 | 0.70 |
+| AUC within multiplicity deciles | 0.68–0.81 | 0.39–0.59 |
+| AUC within HT deciles | 0.61–0.82 | 0.38–0.45 |
+| AUC within leading-pT deciles | 0.69–0.82 | 0.38–0.47 |
+
+**Verdict:** the mean score keeps 0.6–0.8 AUC at fixed multiplicity, HT or leading pT, so it carries
+information beyond any single trivial variable. It does **not** beat the HT baseline overall
+(0.78 vs. 0.79), and it is strongly anti-correlated with multiplicity, so it plausibly tracks average
+particle hardness (HT / multiplicity). That combined baseline has not been tested yet and should be the
+first entry in the Part 2 benchmark.
+
+## 6. Engineering verification
 
 | | Before | After |
 |---|---|---|
@@ -87,7 +126,7 @@ latent, jet/substructure-aware inputs). An unsupervised Part 2 model should be b
 | Train + eval, one seed | ~300 s on Kaggle CPU | 53–81 s on one T4 (two seeds run in parallel) |
 | Seed reproducibility | unseeded | identical AUC across repeated seeded runs (verified locally on CPU) |
 
-## 6. Recommended README corrections
+## 7. Recommended README corrections
 
 1. Report **0.48 ± 0.01 (v2, 5 seeds)** next to the original 0.4615 (v1), and remove 0.4650 / 0.4065.
 2. Replace "random-level" with "slightly below random (inverted)".

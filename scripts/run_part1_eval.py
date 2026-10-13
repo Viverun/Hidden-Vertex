@@ -61,7 +61,7 @@ def load_or_build_split(config):
     )
 
 
-def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels):
+def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra=None):
     model_path = config['evaluation']['model_path']
     metrics_path = config['evaluation']['metrics_path']
     roc_path = config['evaluation']['roc_path']
@@ -84,6 +84,7 @@ def save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels):
         'mean_score': float(np.mean(y_scores)),
         'std_score': float(np.std(y_scores)),
     }
+    metrics.update(extra or {})
     with open(metrics_path, 'w', encoding='utf-8') as handle:
         json.dump(metrics, handle, indent=2)
 
@@ -153,6 +154,7 @@ def main():
     loss_mode = config['training'].get('loss_mode', 'pt_only')
     loss_weights = torch.tensor(config['training']['loss_weights'], device=device)
 
+    avg_loss = float('nan')
     for epoch in range(1, config['training']['epochs'] + 1):
         avg_loss = train_one_epoch(
             model, train_loader, optimizer, device, mean_vec, std_vec,
@@ -162,19 +164,30 @@ def main():
 
     # Score on the same feature(s) the model was trained to reconstruct
     score_features = [0] if loss_mode == 'pt_only' else None
-    y_scores = compute_anomaly_scores(
-        model, test_loader, device, mean_vec, std_vec,
-        reduction=config['evaluation']['score_reduction'],
-        score_features=score_features,
-    )
     y_true = np.asarray(test_labels)
+    reduction = config['evaluation']['score_reduction']
+    scores_by_reduction = {
+        r: compute_anomaly_scores(
+            model, test_loader, device, mean_vec, std_vec, reduction=r, score_features=score_features,
+        )
+        for r in dict.fromkeys([reduction, 'max', 'mean'])
+    }
+    y_scores = scores_by_reduction[reduction]
 
     auc = roc_auc_score(y_true, y_scores)
     auc_ci = bootstrap_auc_ci(y_true, y_scores)
     fpr, tpr, _ = roc_curve(y_true, y_scores)
 
     print(f'Final Purified ROC-AUC: {auc:.4f}  (95% CI {auc_ci[0]:.4f}–{auc_ci[1]:.4f})')
-    save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels)
+    extra = {
+        'auc_by_reduction': {r: float(roc_auc_score(y_true, s)) for r, s in scores_by_reduction.items()},
+        'final_train_loss': float(avg_loss),
+        'loss_mode': loss_mode,
+        'latent_dim': config['model']['latent_dim'],
+        'hidden_layers': list(config['model']['hidden_layers']),
+        'num_parameters': sum(p.numel() for p in model.parameters()),
+    }
+    save_outputs(model, config, auc, auc_ci, fpr, tpr, y_scores, test_labels, extra)
 
 
 if __name__ == '__main__':
