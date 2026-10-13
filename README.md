@@ -258,16 +258,21 @@ An event-level graph autoencoder (dense padded tensors, Chamfer loss, three scor
 latent kNN distance, latent Gaussian-mixture likelihood) was built together with a model-agnostic benchmark
 harness, run on Kaggle (3 seeds, 18 ablation runs, 2 contamination runs) and evaluated against label-free
 baselines. **It did not pass its pre-registered gate:** the best particle-level baseline, mean pT per particle,
-scores AUC 0.811, while the model's scores are inverted (AUC 0.40-0.44), because signal events here are
-lower-multiplicity and harder than QCD background and look *more* typical to the model. Full write-up:
+scores AUC 0.811, while the model's scores are inverted (AUC 0.40-0.44), consistent with signal events here being
+lower-multiplicity and harder than QCD background and looking *more* typical to the latent-density scores (the
+cause of the reconstruction-error inversion is not established). Full write-up:
 [`docs/PART2_RESULTS.md`](docs/PART2_RESULTS.md); design: `docs/superpowers/specs/`.
 
 ```bash
 python scripts/part2_run.py prepare --config configs/part2_main.yaml     # event cache
-python scripts/part2_run.py bank --config configs/part2_main.yaml        # baselines on the frozen test set
 python scripts/part2_sweep.py --stage main --config configs/part2_main.yaml   # 3 seeds
-python scripts/part2_run.py report --tags main --name stage1             # benchmark table + gate
 ```
+
+The `bank` step (baselines on the frozen test set) also needs the Part 1 seed-0 scores for the Stage 1 table to
+match. `scripts/run_part1_eval.py` writes `scores_max` and `scores_mean`; pass both to `bank` via
+`--external "Part 1 AE (max)=<scores.npz>:scores_max" --external "Part 1 AE (mean)=<scores.npz>:scores_mean"`,
+then build the report with `python scripts/part2_run.py report --tags main --name stage1`. The exact Kaggle
+sequence is in `scripts/kaggle/part2_stage0.py`.
 
 ### 🔜 Phase 3: Jet-Aware, Complexity-Controlled Learning (Next)
 

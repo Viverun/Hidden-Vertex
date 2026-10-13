@@ -18,7 +18,7 @@ signal events look *more* typical to the model than background events.
 | Training set | 180,000 pure background events (rows 45,000+); validation slice 20,000 pure background events (last 10% of the 200k) |
 | Model | `EventAE`: 3 neighbour-averaging layers (width 64, ΔR < 0.4, residual), mean/max/pT-weighted pooling, latent 16, decoder to the 48 hardest particles, symmetric Chamfer loss; 95,888 parameters |
 | Scores | (1) Chamfer reconstruction error, (2) mean distance to the 20 nearest training latents, (3) negative Gaussian-mixture log-likelihood (8 components) of the latent; density scorers fit on training latents only |
-| Training | 30 epochs, AdamW lr 1e-3, batch 256, patience 5 (never triggered in the headline runs), ~34 s/epoch on one T4, ~17 min per seed |
+| Training | 30 epochs, AdamW lr 1e-3, batch 256, patience 5 (never triggered in the headline runs), ~34 s/epoch on one T4, ~18 min per seed |
 | Headline runs | 3 seeds (0, 1, 2), configuration fixed before any test-set result |
 | Kaggle kernels (private, `viveriun`) | `hidden-vertex-part2-stage0`, `-stage1`, `-stage2`, `-stage3`, `-smoke` (timing), `-mult` (multiplicity quantiles) |
 
@@ -71,11 +71,12 @@ Seed-averaged AUC (3 seeds), 98.3% bootstrap CI over the 10,000 test events:
 Per seed (Chamfer / kNN / GMM): seed 0 = 0.419 / 0.405 / 0.448; seed 1 = 0.433 / 0.397 / 0.427;
 seed 2 = 0.432 / 0.401 / 0.434. Seed-to-seed spread is about 0.01–0.02, much smaller than the distance to 0.5, so the
 inversion is systematic, not noise. Training was healthy: train and validation loss agree (best validation loss
-0.12–0.13), no latent collapse, no NaNs, and validation loss was still slowly improving at epoch 30.
+0.12–0.13), no latent collapse, no NaNs. Validation loss was noisy and nearly flat at the end of training (best epochs 26, 29 and 30 for
+seeds 0, 1 and 2; seed 0's last five epochs ranged 0.131–0.142).
 
 ## 4. Diagnosis: what the scores track
 
-Spearman correlation of the seed-0 scores with simple event quantities (all test events | background only | signal only):
+Spearman correlation of the seed-0 scores with simple event quantities (jet-level quantities such as jet mass, τ21 and mjj are not in this table; mean pT per particle is particle-level) (all test events | background only | signal only):
 
 | Score | HT | multiplicity | leading pT | mean pT per particle |
 |---|---|---|---|---|
@@ -85,24 +86,32 @@ Spearman correlation of the seed-0 scores with simple event quantities (all test
 
 Findings:
 
-1. **The latent-density scores mostly measure event complexity.** kNN and GMM scores rise with multiplicity and fall
-   with mean pT, within background alone as well. Signal events have *fewer, harder* particles (mean multiplicity
-   140 vs. 182 for background), so they sit in dense, easy regions of the latent space. Under the pre-declared sign
-   ("far from training data = anomalous") this produces AUC below 0.5.
-2. **Within bins of HT, multiplicity and leading pT, the scores carry no useful information.** Within-bin AUC ranges
+1. **The latent-density scores appear to track event complexity.** kNN and GMM scores rise with multiplicity and fall
+   with mean pT, within background alone as well, and their within-multiplicity-bin AUC is near chance (kNN
+   0.43–0.50, GMM 0.47–0.51). Signal events have *fewer, harder* particles (mean multiplicity 140 vs. 182 for
+   background), which is consistent with them sitting in dense, easy regions of the latent space; under the
+   pre-declared sign ("far from training data = anomalous") that would produce AUC below 0.5. This is suggested by the
+   correlations, not tested causally. **The Chamfer score is different:** it barely tracks multiplicity (ρ +0.08) or
+   mean pT (ρ −0.07) and stays inverted within multiplicity bins (0.41–0.48) and HT bins (down to 0.31), so its
+   inversion is not explained by multiplicity alone and its cause is not established.
+2. **Within bins of HT, multiplicity and leading pT, the scores do not recover the signal.** Within-bin AUC ranges
    (seed-averaged): Chamfer HT 0.31–0.56, multiplicity 0.41–0.48, leading pT 0.40–0.44; kNN 0.28–0.54, 0.43–0.50,
-   0.38–0.45; GMM 0.31–0.57, 0.47–0.51, 0.40–0.50. At fixed multiplicity the model does not separate signal.
+   0.38–0.45; GMM 0.31–0.57, 0.47–0.51, 0.40–0.50. Within multiplicity bins the scores are near chance, and within HT
+   bins they carry *inverted* information (AUC 0.28–0.31 at the low end), so at fixed multiplicity or HT the model
+   does not separate signal in the right direction.
 3. **The three scores disagree with each other** (seed 0 Spearman: Chamfer–kNN 0.53, Chamfer–GMM 0.42, kNN–GMM
-   0.87) and the density scores are less stable across seeds (kNN 0.55–0.60, GMM 0.51–0.53) than Chamfer (0.81–0.82).
+   0.87) and the density scores are less stable across seeds (Spearman between seeds over all three pairs 0–1, 0–2,
+   1–2: kNN 0.55–0.80, GMM 0.51–0.71) than Chamfer (0.81–0.83).
 4. For information only: flipping the sign post hoc would give AUC 0.572 (Chamfer), 0.599 (kNN), 0.564 (GMM). That
    is *not* a result (the sign was fixed in advance and the flipped scores are still far below the 0.811 baseline and
    below Part 1's 0.781), but it shows the scores contain a weak complexity signal, not noise.
 
-Interpretation: with this data, the "anomaly" (a heavy resonance decaying to four quarks) produces *less* complex
-events than QCD background in terms of particle count and structure. An autoencoder that models the dominant QCD
-manifold and flags what it reconstructs poorly or places far from training data therefore flags the wrong events.
-What actually distinguishes the signal is jet-level structure (jet mass, two-prong τ21, dijet mass, mean pT), which
-the particle-level encoder had no direct access to.
+Interpretation: the evidence is consistent with the signal events being *less* complex than QCD background in terms
+of particle count (for the latent-density scores), so that an autoencoder modelling the dominant QCD manifold places
+them in dense regions and flags the wrong events. This is a hypothesis supported by correlations, not a tested
+mechanism, and it does not account for the Chamfer inversion (see finding 1). What distinguishes the signal in the
+baselines is jet-level structure (jet mass, two-prong τ21, dijet mass) and particle-level mean pT, which the
+encoder had no direct access to as explicit features.
 
 ## 5. Ablations (sensitivity analysis only; 2 seeds each; not used to select a winner)
 
@@ -122,9 +131,11 @@ Seed-averaged test AUC:
 | pT-weighted Chamfer loss | 2 | 0.475 | 0.454 | 0.468 |
 
 No configuration reaches a useful score; the best single value is 0.502 (K = 24, Chamfer), i.e. chance. Moving from
-K = 48 to K = 24 or 96 and the pT-weighted loss move the Chamfer score closest to 0.5, suggesting that how many
-(soft) particles the loss counts changes how strongly the score is tied to multiplicity, but none helps. Smaller
-latent sizes make the inversion stronger. These runs were not used to modify the headline configuration.
+K = 48 to K = 24 or 96 and the pT-weighted loss move the Chamfer score closest to 0.5, which one might speculate
+means that how many (soft) particles the loss counts changes how strongly the score is tied to multiplicity (speculative:
+K = 24 and K = 96 both move toward 0.5 non-monotonically, and this was not tested), but none helps. Smaller latent
+sizes make the Chamfer inversion stronger (z4 0.366, z8 0.401 vs. 0.428), but not clearly the kNN one (z4 0.405 vs.
+0.401; z8 0.372) and only roughly the GMM one (z4 0.403, z8 0.376 vs. 0.436). These runs were not used to modify the headline configuration.
 
 ## 6. Contamination (single seed; compared with seed 0 of the pure run: 0.419 / 0.405 / 0.448)
 
@@ -134,19 +145,21 @@ latent sizes make the inversion stronger. These runs were not used to modify the
 | 1% signal (≈1,800 events) | 0.424 | 0.420 | 0.461 |
 | 9% signal (16,200 events) | 0.413 | 0.362 | 0.387 |
 
-Realistic 9% contamination makes the density scores *more* inverted (kNN −0.043, GMM −0.061 vs. seed 0), as expected:
-signal events in the training set make signal-like regions denser. The Chamfer score is nearly unaffected. The 1%
-run is within seed spread. Single seed, so differences below ~0.02 should not be read as effects.
+9% contamination (the R&D file's signal fraction) makes the density scores *more* inverted (kNN −0.043, GMM −0.061 vs.
+seed 0), plausibly because signal events in the training set make signal-like regions denser (not tested). The
+Chamfer score is nearly unaffected. The 1% run's kNN (0.420) and GMM (0.461) are slightly above the pure 3-seed ranges
+(kNN 0.397–0.405, GMM 0.427–0.448), by about +0.015; with a single seed this is inconclusive. Differences below ~0.02
+should not be read as effects.
 
 ## 7. Conclusion and recommended next step
 
 The unsupervised event-level graph autoencoder, as specified, **does not beat the simple baselines** and is below
-chance on this test set; the clear explanation (Section 4) is that signal events here are lower in multiplicity and
-harder than background, which the model treats as typical. The honest deliverables of Part 2 are therefore:
+chance on this test set; the evidence (Section 4) is consistent with signal events here being lower in multiplicity and
+harder than background, which the latent-density scores treat as typical (the Chamfer inversion is not explained by this). The honest deliverables of Part 2 are therefore:
 
 - a validated, model-agnostic benchmark harness (reproduces the Part 1 numbers exactly) and the full baseline
   table, including the finding that **mean pT per particle (0.811) is the particle-level bar to beat**;
-- a negative result with a mechanism, backed by ablations and a contamination run.
+- a negative result with a partially supported explanation (latent-density scores only), backed by ablations and a contamination run.
 
 Recommended next steps, in order of expected value (spec fallback: "adding jet-substructure inputs"):
 
@@ -167,5 +180,18 @@ Recommended next steps, in order of expected value (spec fallback: "adding jet-s
   last as the "run finished" marker, summary keyed on that marker).
 - The sweep gets one more validation than the plan: unknown `training.loss` values raise instead of silently
   falling back to plain Chamfer.
+- The smoke run (3 epochs, 20k events) computed and printed test AUCs; they were ignored and changed no configuration.
+- Spec Section 3 called for extending `src/data/oracle_split.py`; a new module `src/data/event_store.py` was used
+  instead so that Part 1 code stays untouched.
+- Context for the within-bin criterion: the bar baseline itself (mean pT per particle) has a minimum within-bin AUC of
+  0.599, below the 0.6 criterion.
 - The jet-feature AE reference row was not built (it needs a separate model and is not part of the gate).
 - Deferred minor review notes are listed in the SDD ledger (not part of the repository).
+
+### Known limitations / follow-ups for Part 3 (deferred, not fixed)
+
+- Runs are joined to the benchmark bank only by checking label vectors, so within-class row misalignment would go
+  undetected; store test row ids in scores and bank files and assert equality.
+- Provenance: record the resolved config and git SHA (plus dirty flag) in metrics and in the Kaggle bundle.
+- The `labels.npy` cache is not tied to the HDF5 file identity.
+- `apply_overrides` accepts items without `=`.
