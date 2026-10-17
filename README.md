@@ -7,315 +7,280 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23432779.svg)](https://doi.org/10.5281/zenodo.23432779)
 
-## 🎯 What Is This?
+## What this project is
 
-**The Hidden Vertex** is a deep learning research project aimed at discovering
-unknown particles at the **Large Hadron Collider (LHC)** without being told what
-to look for.
+The Hidden Vertex is a research project in machine learning for particle physics.
+It tests if a graph autoencoder (GAE) can find unknown particles at the Large Hadron Collider (LHC)
+without information about the signal.
 
-### The Problem
-The LHC trigger and filtering systems discard **99.998% of collision data** using
-hard-coded, theory-driven rules.  
-If new physics does not resemble our predefined expectations, it is lost
-forever.
+The method is unsupervised anomaly detection:
 
-### The Solution
-Train AI systems to learn **Standard Model (SM) physics so well** that anything
-unusual automatically stands out — enabling **model-independent discovery** of
-new physics.
+1. Train a model on Standard Model background events only.
+2. Use the model to give each new event an anomaly score.
+3. Examine the events that have the highest scores.
 
-### Project Status (Oct 2026)
+The data is the LHC Olympics 2020 R&D dataset. The background is QCD dijet events. The signal is a W′ → XY → (qq̄)(qq̄) resonance
+(m(W′) = 3.5 TeV, m(X) = 500 GeV, m(Y) = 100 GeV).
 
-- **Part 1 (node-level GAE) is complete**: negative-but-useful result; max-reduction AUC 0.483 ± 0.005 (see `docs/PART1_VERIFICATION.md`).
-- **Part 2 (event-level GAE) is complete**: pre-registered gate **not passed**; all three anomaly scores are inverted (AUC 0.40–0.44), while the label-free mean pT per particle (HT/N) reaches **0.811** (see `docs/PART2_RESULTS.md`).
-- **Preprint**: `paper/main.pdf` (LaTeX source in `paper/`), DOI [10.5281/zenodo.23432779](https://doi.org/10.5281/zenodo.23432779).
-- **Trained models**: the Part 2 event-level autoencoder (3 seeds), with per-event test scores and HDF5 row ids, at [huggingface.co/Viverun/lhco-rnd-event-gae](https://huggingface.co/Viverun/lhco-rnd-event-gae).
-- **Part 3** (jet-aware, complexity-controlled model) is next.
+## Project status (October 2026)
 
-For this reason, Part 1 should be interpreted as a validated infrastructure + physics baseline, not as a final anomaly detector.
+| Part | Model | Status | Result |
+|---|---|---|---|
+| 1 | Node-level GAE | Complete | AUC 0.483 ± 0.005 (max error). See `docs/PART1_VERIFICATION.md`. |
+| 2 | Event-level GAE | Complete | The pre-registered gate failed. See `docs/PART2_RESULTS.md`. |
+| 3 | Jet-aware model with complexity control | Next | Not started. |
 
----
+In Part 2, all three anomaly scores have an AUC of 0.40 to 0.44. An AUC below 0.5 means that the model
+gives background events higher scores than signal events. A simple variable without labels,
+the mean transverse momentum per particle (HT/N), gets an AUC of 0.811 on the same events.
 
-## 🚀 Quick Start
+Thus, the results are negative. The project gives a validated benchmark harness and a set of baselines.
+It does not give a final anomaly detector.
 
-### 1. Notebook-First Experience (Recommended)
+## Publications and files
 
-For most users, the notebook is the primary and best way to use this project.
+| Item | Location |
+|---|---|
+| Preprint | `paper/main.pdf` (LaTeX source in `paper/`) |
+| Archive (DOI) | [10.5281/zenodo.23432779](https://doi.org/10.5281/zenodo.23432779) |
+| Trained Part 2 models | [huggingface.co/Viverun/lhco-rnd-event-gae](https://huggingface.co/Viverun/lhco-rnd-event-gae) |
 
-- Open: `notebooks/lhc-anamoly-detector-part(1).ipynb`
-- Follow cells in order to reproduce the full Part 1 story (data pipeline → model → oracle purification → ROC analysis)
-- Use Kaggle runtime for easiest dependency compatibility
+The Hugging Face repository has the Part 2 checkpoints for three seeds. It also has the anomaly score
+and the HDF5 row number of each test event.
 
-This is the **canonical user-facing workflow** for Part 1.
+## Quick start
 
----
+### 1. Part 1 notebook
 
-### 2. Kaggle Infrastructure (Optional Setup Path)
+1. Open `notebooks/lhc-anamoly-detector-part(1).ipynb`.
+2. Run the cells in sequence.
+3. Use a Kaggle runtime. This runtime has all the necessary packages.
 
-The easiest way to explore this project is via the **Kaggle Model Hub**.
+The notebook shows the full Part 1 procedure: the data pipeline, the model, the oracle purification and
+the ROC analysis.
 
-- Attach Dataset: [https://www.kaggle.com/datasets/viveriun/lhc-collider](https://www.kaggle.com/datasets/viveriun/lhc-collider)
-- Import Model: Use the provided `model_architecture.py` and `norm_stats.pt`
+### 2. Kaggle (optional)
 
-This provides a fully reproducible, dependency-safe environment.
+1. Attach the dataset [kaggle.com/datasets/viveriun/lhc-collider](https://www.kaggle.com/datasets/viveriun/lhc-collider).
+2. Import the model with `model_architecture.py` and `norm_stats.pt`.
 
----
-
-### 3. Local Installation (Developer / Repro Support)
+### 3. Local installation
 
 ```bash
-# Clone repository
 git clone https://github.com/Viverun/Hidden-Vertex.git
 cd Hidden-Vertex
+pip install -r requirements.txt      # PyTorch Geometric is necessary
+python -m pytest tests               # run the test suite
+```
 
-# Install dependencies (requires PyTorch Geometric)
-pip install -r requirements.txt
+### 4. Part 1 with the repository scripts
 
-# Run the test suite
-python -m pytest tests
-````
-
-### 4. Part 1 Notebook Parity (Repository Workflow)
-
-To reproduce notebook logic via local scripts/modules:
+These commands do the same work as the notebook:
 
 ```bash
-# 1) Build oracle-purified train/test split
+# 1) Make the oracle-purified training and test split
 python main.py prepare-part1 --config configs/part1_notebook_parity.yaml
 
-# 2) Train + evaluate Part 1 purified baseline
+# 2) Train and evaluate the Part 1 baseline
 python scripts/run_part1_eval.py --config configs/part1_notebook_parity.yaml
 ```
 
-Outputs are saved to:
+The scripts write these files:
 
-- `results/models/part1_purified_baseline.pt`
-- `results/scores/part1_metrics.json` (AUC, bootstrap 95% CI, seed)
-- `results/scores/part1_scores.npz` (per-event scores and labels)
-- `results/figures/part1_roc.png`
+| File | Contents |
+|---|---|
+| `results/models/part1_purified_baseline.pt` | Trained model |
+| `results/scores/part1_metrics.json` | AUC, bootstrap 95% confidence interval, seed |
+| `results/scores/part1_scores.npz` | Score and label of each event |
+| `results/figures/part1_roc.png` | ROC curve |
 
-Runs are seeded (`training.seed`, or `--seed N`); `run_part1_eval.py` reuses the split saved by
-`prepare-part1`. Optional diagnostics (baselines, correlations, ablations):
+To set the random seed, use `training.seed` in the configuration file or the option `--seed N`.
+The script `run_part1_eval.py` uses the split that `prepare-part1` saved.
+
+To calculate the baselines, correlations and ablations, run this command:
 
 ```bash
 python scripts/part1_diagnostics.py --features dataset/raw/events_anomalydetection_v2.features.h5
 ```
 
----
-
-## 🏗️ Technical Highlights (Part 1 Baseline)
-
-### Why Graph Neural Networks?
-
-Traditional ML approaches rasterize sparse particle data into dense images
-(CNNs).
-This project instead treats collisions as **geometric graphs**:
-
-* **Particles → Nodes**
-  Features: `log pT`, `η`, `φ`
-
-* **Topology → Radius Graphs**
-  Edges connect particles within physical detector space
-  `ΔR < 0.4`, mimicking the anti-`k_t` jet clustering algorithm
-
----
-
-### Architecture: Node-Level Strict Autoencoder
-
-**Phase 1 Hypothesis:**
-Can a node-level bottleneck detect event-level anomalies?
-
-```
-Input Graph (Radius Graph, ΔR < 0.4)
-        ↓
-GCN Layers (Message Passing)
-        ↓
-Bottleneck: 1D Latent Space (per particle)
-        ↓
-Decoder: Reconstruction of (log pT, η, φ)
-```
-
----
-
-## 📊 Results & Scientific Findings
-
-The baseline was evaluated using the **LHC Olympics 2020 R&D dataset**.
-An *Oracle purification* procedure ensured strictly unsupervised learning on
-pure background events only.
-
-### Metrics
-
-| | AUC |
-|---|---|
-| Notebook (original shuffled `events_anomalydetection.h5`, 1 unseeded run) | 0.4615 |
-| Repository pipeline (`events_anomalydetection_v2.h5`, seeds 0–4) | **0.483 ± 0.005** |
-
-* **Trainable Parameters**: 420 effective (the notebook reports 429; 9 belong to an attention gate whose output is never used)
-* Full verification, baselines and ablations: [`docs/PART1_VERIFICATION.md`](docs/PART1_VERIFICATION.md)
-
-### Key Result
-
-The node-level reconstruction error is slightly **below** random (a weak inverted signal):
-it scores QCD background as marginally more anomalous than the W′ signal.
-
-How node errors are combined matters more than model size: the same trained model reaches
-**AUC 0.78 with a mean** over particles instead of the max, which is still no better than the Σ pT baseline,
-and a 44× larger model changes nothing (capacity sweep, `docs/PART1_VERIFICATION.md` §5).
-
-The max-error result is a failure of the *reconstruction-error score*, not of particle-level information:
-simple event quantities built from the same particle lists separate well (Σ pT: AUC 0.79,
-fewer particles: 0.72; jet-level −τ21: 0.80).
-
----
-
-## 🔬 Physics Context
-
-This project is built using the **LHC Olympics 2020 Anomaly Detection Challenge**
-dataset. The objective is to identify **Beyond Standard Model (BSM)** physics
-signals hidden within a dominant background of **Standard Model QCD** radiation.
-
-### Note on Data
-
-The full raw HDF5 dataset is intentionally not stored here to keep this
-repository lightweight.
-
-**Two file versions behave differently.** The notebook used the original shuffled
-`events_anomalydetection.h5` (~9% signal throughout). The public
-`events_anomalydetection_v2.h5` (e.g. Kaggle `atulchikku/lhc-olympics-2020-ad-r-and-d`) is **sorted**:
-rows 0–999,999 are background and 1,000,000+ are signal. The parity config therefore uses
-`scan_limit: null` so the oracle split scans the whole file.
-
-Please refer to the official **Zenodo release** for the complete
-**1.1 million event dataset**.
-
----
-
-## 🧠 The Discovery Logic: Why a 1D Bottleneck?
-
-This study employs a **Strict Node-Level Autoencoder**.
-
-By forcing each particle through a **1D latent bottleneck**, we directly test the
-hypothesis that BSM physics manifests as **irreducible particle-level
-reconstruction errors**.
-
-### Key Finding
-
-Results from **Part 1** show that while node-level GNNs are computationally
-efficient, detecting **heavy resonances** requires sensitivity to **global event
-structure**, such as:
-
-* Invariant mass distributions
-* Multi-jet correlations
-
-These effects are explored further in **Part 2**, which transitions toward
-**event-level latent representations**.
-
----
-
-## 🔬 The Physics Autopsy: What the Score Actually Measures
-
-Two ablations explain the result (details in `docs/PART1_VERIFICATION.md`):
-
-* **The 1D bottleneck does not constrain anything.** The loss only scores pT, and a 1D latent can carry
-  pT losslessly: a per-particle MLP with the same bottleneck reaches MSE 0.0001.
-* **All reconstruction error comes from GCN neighbourhood averaging** (ΔR < 0.4). The score measures how
-  far a particle's pT is from its neighbours'. It tracks the **leading-particle pT** (Spearman 0.70),
-  not multiplicity (−0.07), so the earlier "multiplicity trap" explanation is not supported.
-
-At fixed leading-particle pT, signal events reconstruct slightly *better* than QCD, which produces the
-sub-0.5 AUC. This motivates Phase 2: an event-level bottleneck and jet/substructure-aware inputs.
-
----
-
-## ⚠️ Known Limitations (Part 1)
-
-- Node-level reconstruction is weak for event-level anomaly signatures.
-- The model does not explicitly encode invariant mass or global event shape.
-- Max-node error scoring is dominated by the leading particle's pT.
-- With a pT-only loss, the 1D latent is not an information bottleneck.
-- Part 1 is a baseline/proof stage, not a final discovery architecture.
-
----
-
-## ✅ Part 1 Freeze Checklist
-
-- Notebook is the canonical user-facing Part 1 workflow.
-- Notebook narrative and repository workflow are aligned for baseline reproduction.
-- Oracle purification + evaluation scripts are available in repository code.
-- Part 1 outputs are reproducible via the commands in Quick Start.
-- Further model changes should be tracked under Part 2.
-
----
-
-## 📈 Roadmap
-
-### ✅ Phase 1: Node-Level Baseline (Complete)
-
-* ✓ Memory-safe HDF5 streaming pipeline
-* ✓ Radius graph generation via `torch.cdist`
-* ✓ Node-level 1D-bottleneck GNN autoencoder
-* ✓ Oracle dataset purification
-
-### ✅ Phase 2: Global Event Learning (Complete, negative result)
-
-An event-level graph autoencoder (dense padded tensors, Chamfer loss, three scores: reconstruction error,
-latent kNN distance, latent Gaussian-mixture likelihood) was built together with a model-agnostic benchmark
-harness, run on Kaggle (3 seeds, 18 ablation runs, 2 contamination runs) and evaluated against label-free
-baselines. **It did not pass its pre-registered gate:** the best particle-level baseline, mean pT per particle,
-scores AUC 0.811, while the model's scores are inverted (AUC 0.40-0.44), consistent with signal events here being
-lower-multiplicity and harder than QCD background and looking *more* typical to the latent-density scores (the
-cause of the reconstruction-error inversion is not established). Full write-up:
-[`docs/PART2_RESULTS.md`](docs/PART2_RESULTS.md); design: `docs/superpowers/specs/`.
+### 5. Part 2
 
 ```bash
-python scripts/part2_run.py prepare --config configs/part2_main.yaml     # event cache
-python scripts/part2_sweep.py --stage main --config configs/part2_main.yaml   # 3 seeds
+python scripts/part2_run.py prepare --config configs/part2_main.yaml        # make the event cache
+python scripts/part2_sweep.py --stage main --config configs/part2_main.yaml  # train 3 seeds
 ```
 
-The `bank` step (baselines on the frozen test set) also needs the Part 1 seed-0 scores for the Stage 1 table to
-match. `scripts/run_part1_eval.py` writes `scores_max` and `scores_mean`; pass both to `bank` via
-`--external "Part 1 AE (max)=<scores.npz>:scores_max" --external "Part 1 AE (mean)=<scores.npz>:scores_mean"`,
-then build the report with `python scripts/part2_run.py report --tags main --name stage1`. The exact Kaggle
-sequence is in `scripts/kaggle/part2_stage0.py`.
+The `bank` step calculates the baselines on the frozen test set. For the Stage 1 table, this step also
+needs the Part 1 seed-0 scores:
 
-### 🔜 Phase 3: Jet-Aware, Complexity-Controlled Learning (Next)
+1. Run `scripts/run_part1_eval.py`. It writes `scores_max` and `scores_mean`.
+2. Give both arrays to `bank`:
+   `--external "Part 1 AE (max)=<scores.npz>:scores_max" --external "Part 1 AE (mean)=<scores.npz>:scores_mean"`.
+3. Make the report: `python scripts/part2_run.py report --tags main --name stage1`.
 
-* ⏳ Jet-level inputs (jet masses, tau21, mjj) alongside particle features
-* ⏳ Condition on / regress out multiplicity and mean pT so the score measures structure at fixed complexity
+The full Kaggle sequence is in `scripts/kaggle/part2_stage0.py`.
 
----
+## Part 1: node-level autoencoder
 
-## 📚 Documentation
+### Graph representation
 
-| Resource   | Description                              |
-| ---------- | ---------------------------------------- |
-| Kaggle Hub | Access pretrained weights & architecture |
-| Notebook   | Step-by-step training walkthrough        |
-| `docs/PART1_VERIFICATION.md` | Part 1 audit: verified numbers, data-file gotchas, capacity sweep |
+The model does not change the sparse particle data into images. It uses a graph for each event:
+
+* Nodes are particles. The node features are `log pT`, `η` and `φ`.
+* Edges connect two particles if their distance ΔR is 0.4 or less.
+  This value is the same as the radius of the anti-kt jet algorithm.
+
+### Architecture
+
+The question for Part 1 was: can a bottleneck at the particle level find anomalies at the event level?
+
+```
+Input graph (radius graph, ΔR ≤ 0.4)
+        ↓
+GCN layers (message passing)
+        ↓
+Bottleneck: 1D latent space for each particle
+        ↓
+Decoder: reconstruction of (log pT, η, φ)
+```
+
+### Results
+
+The data is the LHC Olympics 2020 R&D dataset. The training set has background events only
+(oracle purification).
+
+| Run | AUC |
+|---|---|
+| Notebook (original shuffled `events_anomalydetection.h5`, 1 run without a seed) | 0.4615 |
+| Repository pipeline (`events_anomalydetection_v2.h5`, seeds 0 to 4) | **0.483 ± 0.005** |
+
+* The model has 420 effective trainable parameters. The notebook shows 429. Nine parameters are in an
+  attention gate, and the model does not use the output of this gate.
+* For the full verification, the baselines and the ablations, see
+  [`docs/PART1_VERIFICATION.md`](docs/PART1_VERIFICATION.md).
+
+### Main result
+
+The maximum particle reconstruction error gives an AUC slightly below 0.5. Thus, the model gives the
+QCD background slightly higher scores than the W′ signal.
+
+The method that combines the particle errors has a large effect. The model size has almost no effect:
+
+* With the mean error instead of the maximum, the same model gets an AUC of 0.78. This value is not
+  better than the Σ pT baseline.
+* A model that is 44 times larger gives the same result (capacity sweep, `docs/PART1_VERIFICATION.md` §5).
+
+Thus, the reconstruction-error score fails. The particle information is not the problem. Simple event
+variables from the same particle lists separate signal from background. Σ pT has an AUC of 0.79.
+Fewer particles has 0.72. The jet variable −τ21 has 0.80.
+
+### Analysis: what the score measures
+
+Two ablations explain the result. For the details, see `docs/PART1_VERIFICATION.md`.
+
+* The 1D bottleneck does not limit the model. The loss uses pT only, and one latent number can carry pT
+  without loss. A per-particle MLP with the same bottleneck gets a mean squared error of 0.0001.
+* All the reconstruction error comes from the GCN, which averages each particle with its neighbours
+  (ΔR ≤ 0.4). Thus, the score measures the difference between the pT of a particle and the pT of its
+  neighbours.
+* The score follows the pT of the leading particle (Spearman 0.70). It does not follow the multiplicity
+  (−0.07). Thus, the data does not support the earlier "multiplicity trap" explanation.
+
+At a fixed leading-particle pT, the model reconstructs signal events slightly better than QCD events.
+This causes the AUC below 0.5. This result was the reason for Part 2: a bottleneck at the event level
+and inputs with jet and substructure information.
+
+### Limits of Part 1
+
+- Node-level reconstruction does not find event-level anomalies well.
+- The model does not encode the invariant mass or the global event shape.
+- The pT of the leading particle controls the maximum node error.
+- With a loss that uses pT only, the 1D latent is not an information bottleneck.
+- Part 1 is a baseline. It is not a final discovery architecture.
+
+### Part 1 freeze checklist
+
+- The notebook is the main Part 1 workflow for users.
+- The notebook and the repository scripts give the same baseline.
+- The repository has the oracle purification and the evaluation scripts.
+- The Quick Start commands reproduce the Part 1 results.
+- Record all new model changes in Part 2 or later.
+
+## Part 2: event-level autoencoder
+
+The Part 2 model is an event-level graph autoencoder. It uses dense padded tensors and a Chamfer loss.
+It gives three scores:
+
+1. The reconstruction error.
+2. The distance to the nearest neighbours in the latent space (kNN).
+3. The likelihood under a Gaussian mixture model in the latent space (GMM).
+
+The work also made a benchmark harness that can evaluate any model. On Kaggle, the project trained
+3 seeds, 18 ablation runs and 2 runs with signal contamination. The results were compared with baselines
+that do not use labels.
+
+The model did not pass its pre-registered gate. The best particle-level baseline, HT/N, has an AUC of
+0.811. The model scores have an AUC of 0.40 to 0.44.
+
+The signal events in this dataset have fewer particles than the QCD background, and their particles have
+higher pT. The latent-density scores find these events more typical than background events. This agrees
+with the AUC below 0.5. The cause of the inversion of the reconstruction-error score is not known.
+
+For the full report, see [`docs/PART2_RESULTS.md`](docs/PART2_RESULTS.md). For the design, see
+`docs/superpowers/specs/`.
+
+## Part 3: plan
+
+* Add jet-level inputs (jet masses, τ21, mjj) to the particle features.
+* Control the score for multiplicity and mean pT. Then the score measures the event structure at a
+  fixed complexity.
+
+## Data
+
+The repository does not include the raw HDF5 dataset because the file is large. Get the full dataset of
+1.1 million events from the official Zenodo record of the LHC Olympics 2020 R&D dataset.
+
+**Caution:** the two versions of the data file have different row orders.
+
+* The notebook used the original file `events_anomalydetection.h5`. Its rows are shuffled, and
+  approximately 9% of the events in each part of the file are signal.
+* The public file `events_anomalydetection_v2.h5` is sorted. It is on Kaggle as
+  `atulchikku/lhc-olympics-2020-ad-r-and-d`. Rows 0 to 999,999 are background, and rows 1,000,000 and
+  higher are signal.
+
+Thus, the parity configuration sets `scan_limit: null`. With this setting, the oracle split reads the
+full file.
+
+## Documents
+
+| Document | Contents |
+|---|---|
+| `notebooks/` | Part 1 training notebook, step by step |
+| `docs/OVERVIEW.md` | Project overview |
+| `docs/DATA.md` | Dataset and data pipeline |
+| `docs/PHYSICS.md` | Physics background |
+| `docs/ARCHITECTURE.md` | Model architecture |
+| `docs/TRAINING.md` | Training procedure |
+| `docs/PART1_VERIFICATION.md` | Part 1 audit: verified numbers, data-file problems, capacity sweep |
 | `docs/PART2_RESULTS.md` | Part 2 results: benchmark table, diagnosis, ablations, next steps |
 
----
+## Citation
 
-## 📜 Citation
+Cite the archived release:
 
 ```bibtex
-@software{hidden_vertex_2026,
-  title  = {The Hidden Vertex: Unsupervised Discovery of Long-Lived Particles using Graph Autoencoders},
-  author = {Jamil Khan},
+@misc{khan2026gae,
+  author = {Khan, Jamil},
+  title  = {When Graph Autoencoders Look the Wrong Way: Complexity Bias and Simple Baselines in
+            Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset},
   year   = {2026},
-  url    = {https://github.com/Viverun/Hidden-Vertex},
-  note   = {Graph Neural Network baseline for particle physics anomaly detection}
+  doi    = {10.5281/zenodo.23432779},
+  url    = {https://github.com/Viverun/Hidden-Vertex}
 }
 ```
 
----
+## Purpose
 
-## 🌟 Why This Matters
-
-Particle physics discovery has stagnated since the Higgs boson in 2012.
-
-**The Hidden Vertex** shifts the paradigm from:
-
-*“Searching for what we predict”*
-to
-*“Discovering what we didn’t expect.”*
+Most LHC searches look for a signal that a theory predicts. This project tests a different method:
+learn the background, and then look for events that do not agree with it. The Part 1 and Part 2 results
+show that this method needs strong baselines and controls for event complexity.

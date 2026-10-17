@@ -1,592 +1,226 @@
-# Training Guide - The Hidden Vertex
+# Training: The Hidden Vertex
 
-> **Note (2026-10):** Parts of this document describe the *planned* design (k-NN graphs, a 10D
-> event-level latent, global pooling). The implemented Part 1 baseline uses ΔR < 0.4 radius graphs and a
-> per-particle 1D latent (`configs/part1_notebook_parity.yaml`). For verified Part 1 numbers see
-> [`PART1_VERIFICATION.md`](PART1_VERIFICATION.md).
+This document gives the training procedures for Part 1 and Part 2, the Kaggle procedure and the expected results.
 
-> **Complete training pipeline with all optimizations discovered through iterative development**
+## 1. Requirements
 
-## Table of Contents
-- [Quick Start](#quick-start)
-- [Google Colab Setup](#google-colab-setup)
-- [Local Training](#local-training)
-- [Troubleshooting](#troubleshooting)
-- [Performance Optimization](#performance-optimization)
+- Python 3.10 or later.
+- The packages in `requirements.txt`. PyTorch Geometric is necessary for Part 1.
+- The file `events_anomalydetection_v2.h5` (see `DATA.md`). Part 2 baselines also use
+  `events_anomalydetection_v2.features.h5`.
+- A GPU is recommended. All the results in this repository come from NVIDIA T4 GPUs on Kaggle.
 
----
+Install the packages and run the tests:
 
-## Quick Start
-
-### Prerequisites
-- Python 3.10+
-- CUDA-capable GPU (8GB+ VRAM recommended)
-- 16GB+ RAM
-- ~20GB disk space for processed data
-
-### Installation
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/vertex.git
-cd vertex
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
-
-# Install dependencies
 pip install -r requirements.txt
+python -m pytest tests
 ```
 
----
+## 2. Part 1
 
-## Google Colab Setup
+### 2.1 Procedure
 
-### Initial Setup (5 minutes)
+1. Make the oracle split:
 
-**Cell 1: Mount Drive & Install Packages**
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-
-# Install PyTorch Geometric (pre-built wheels - fast!)
-!pip install torch==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cu121
-!pip install pyg_lib torch_scatter torch_sparse torch_cluster -f https://data.pyg.org/whl/torch-2.4.0+cu121.html
-!pip install torch_geometric pytorch-lightning tables
-```
-
-**Cell 2: Copy Data to Local Disk** (Critical for speed!)
-```python
-import shutil
-import os
-
-# Copy processed chunks from Drive to local disk (~10 min one-time)
-source = '/content/drive/MyDrive/LHC_Project/Processed_Graphs/processed'
-dest = '/content/Processed_LOCAL/processed'
-
-os.makedirs(dest, exist_ok=True)
-for i in range(10):  # Copy first 10 chunks for subset training
-    src_file = f'{source}/data_chunk_{i}.pt'
-    dst_file = f'{dest}/data_chunk_{i}.pt'
-    if not os.path.exists(dst_file):
-        shutil.copy2(src_file, dst_file)
-        print(f'✓ Chunk {i}')
-```
-
-### Resource Management
-
-**Colab Free Tier Limits:**
-- ~12 hours max session
-- Compute units reset every 24 hours
-- Can disconnect anytime when quota exhausted
-
-**Best Practices:**
-1. Train during fresh session (morning)
-2. Save checkpoints to Drive every epoch
-3. Monitor `Resources` panel
-4. Consider Colab Pro for serious training ($10/month)
-
----
-
-## Training Pipeline
-
-### Step 1: Data Preprocessing
-
-**Feature Normalization (CRITICAL!)**
-
-Raw particle features have vastly different scales:
-- pT: 0.1 → 850 GeV (huge range!)
-- η: -5 → +5 (small range)
-- φ: -π → +π (small range)
-
-**Solution: Log-scale pT**
-```python
-# Normalize features
-x_normalized = data.x.clone()
-x_normalized[:, 0] = torch.log(data.x[:, 0] + 1e-8)  # pT → log(pT)
-# η, φ already in good ranges
-```
-
-**Why This Matters:**
-- Without normalization: Loss = 1500+, training fails
-- With normalization: Loss = 0.1-1.0, model learns
-
-### Step 2: Dataset Filtering
-
-**The "Detective School" Approach:**
-
-Train ONLY on background events (Standard Model physics).
-
-```python
-# Filter for background only (y=0.0)
-background_indices = []
-anomaly_indices = []
-
-for chunk_idx in range(110):
-    chunk_data = torch.load(f'processed/data_chunk_{chunk_idx}.pt')
-    base_idx = chunk_idx * 10000
-    
-    for i, graph in enumerate(chunk_data):
-        actual_idx = base_idx + i
-        if graph.y.item() == 0.0:
-            background_indices.append(actual_idx)
-        else:
-            anomaly_indices.append(actual_idx)
-
-print(f'Background: {len(background_indices):,}')
-print(f'Anomalies: {len(anomaly_indices):,}')
-```
-
-**Security Check:**
-```python
-# Verify training set has ZERO anomalies
-def verify_no_contamination(dataset, samples=100):
-    indices = np.random.choice(len(dataset), samples, replace=False)
-    labels = [dataset[i].y.item() for i in indices]
-    
-    if 1.0 in labels:
-        raise ValueError("🚨 CONTAMINATION! Anomalies in training set!")
-    print("✅ Clean - 100% background events")
-
-verify_no_contamination(train_dataset)
-```
-
-### Step 3: Train/Val/Test Split
-
-```python
-# Split background events
-train_ratio = 0.7
-val_ratio = 0.15
-test_ratio = 0.15
-
-num_bg = len(background_indices)
-indices = torch.randperm(num_bg).tolist()
-
-train_size = int(train_ratio * num_bg)
-val_size = int(val_ratio * num_bg)
-
-train_indices = indices[:train_size]
-val_indices = indices[train_size:train_size + val_size]
-test_bg_indices = indices[train_size + val_size:]
-
-# Test set: background + ALL anomalies
-test_dataset = ConcatDataset([test_bg_dataset, anomaly_dataset])
-```
-
-**Final Split:**
-- Training: 700k background (learns Standard Model)
-- Validation: 150k background (tunes hyperparameters)
-- Test: 150k background + 100k anomalies (evaluation)
-
-### Step 4: Model Architecture
-
-```python
-class GraphAutoencoder(nn.Module):
-    def __init__(self, input_dim=3, latent_dim=10):
-        super().__init__()
-        
-        # Encoder: Graph → 10D bottleneck
-        self.conv1 = GCNConv(3, 64)
-        self.conv2 = GCNConv(64, 32)
-        self.fc_encode = nn.Linear(32, latent_dim)
-        
-        # Decoder: 10D → Reconstructed graph
-        self.fc_decode = nn.Linear(latent_dim, 64)
-        self.node_reconstructor = nn.Linear(64, 3)
-    
-    def encode(self, x, edge_index, batch):
-        h = F.relu(self.conv1(x, edge_index))
-        h = F.relu(self.conv2(h, edge_index))
-        graph_embedding = global_mean_pool(h, batch)
-        z = self.fc_encode(graph_embedding)
-        return z
-    
-    def decode(self, z, batch):
-        h = F.relu(self.fc_decode(z))
-        h_broadcasted = h[batch]
-        x_recon = self.node_reconstructor(h_broadcasted)
-        return x_recon
-```
-
-**Why 10 Dimensions?**
-- Forces extreme compression
-- Model must learn fundamental physics laws
-- Anomalies can't fit learned manifold → high reconstruction error
-
-### Step 5: Training Loop
-
-```python
-# Hyperparameters
-learning_rate = 1e-3
-weight_decay = 1e-5
-batch_size = 32
-num_epochs = 50
-patience = 10  # Early stopping
-
-# Setup
-device = torch.device('cuda')
-model = GraphAutoencoder(latent_dim=10).to(device)
-optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-criterion = nn.MSELoss()
-
-# Training
-best_val_loss = float('inf')
-patience_counter = 0
-
-for epoch in range(1, num_epochs + 1):
-    # Training phase
-    model.train()
-    train_loss = 0.0
-    
-    for batch in train_loader:
-        batch = batch.to(device)
-        optimizer.zero_grad()
-        
-        # Forward pass
-        z = model.encode(batch.x, batch.edge_index, batch.batch)
-        x_recon = model.decode(z, batch.batch)
-        
-        # Loss
-        loss = criterion(x_recon, batch.x)
-        
-        # Backward pass
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        optimizer.step()
-        
-        train_loss += loss.item()
-    
-    avg_train_loss = train_loss / len(train_loader)
-    
-    # Validation phase
-    model.eval()
-    val_loss = 0.0
-    
-    with torch.no_grad():
-        for batch in val_loader:
-            batch = batch.to(device)
-            z = model.encode(batch.x, batch.edge_index, batch.batch)
-            x_recon = model.decode(z, batch.batch)
-            loss = criterion(x_recon, batch.x)
-            val_loss += loss.item()
-    
-    avg_val_loss = val_loss / len(val_loader)
-    
-    print(f'Epoch {epoch} | Train: {avg_train_loss:.6f} | Val: {avg_val_loss:.6f}')
-    
-    # Checkpointing
-    if avg_val_loss < best_val_loss:
-        best_val_loss = avg_val_loss
-        patience_counter = 0
-        torch.save(model.state_dict(), 'best_model.pt')
-    else:
-        patience_counter += 1
-        if patience_counter >= patience:
-            print('Early stopping!')
-            break
-```
-
----
-
-## Performance Optimization
-
-### Problem: Slow Data Loading (143 seconds/batch!)
-
-**Root Cause:**
-- Loading full 10k-graph chunks from disk
-- Google Drive I/O is extremely slow
-- Chunk caching helps but limited
-
-**Solutions:**
-
-#### 1. Train on Subset (Recommended for Colab)
-```python
-# Use first 100k events instead of 700k
-subset_size = 100000
-train_indices_subset = [idx for idx in train_indices if idx < subset_size]
-
-# Training time: 30 min/epoch (manageable!)
-```
-
-#### 2. Copy Data to Local Disk
-```python
-# One-time copy: Drive → Colab local disk (100x faster I/O)
-shutil.copytree('/content/drive/.../processed', '/content/Processed_LOCAL/processed')
-```
-
-#### 3. Pre-cache Training Data
-```python
-# Create single fast-loading file (one-time, ~10 min)
-train_graphs = []
-for chunk_idx in range(10):
-    chunk = torch.load(f'chunk_{chunk_idx}.pt')
-    train_graphs.extend([g for g in chunk if g.y.item() == 0.0])
-
-torch.save(train_graphs, 'train_cache.pt')
-
-# Tomorrow: load in 5 seconds instead of hours!
-train_data = torch.load('train_cache.pt')
-```
-
-### DataLoader Configuration
-
-```python
-# CRITICAL: Set num_workers=0 on Colab (multiprocessing hangs)
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=32,
-    shuffle=True,
-    num_workers=0,      # ← Important for Colab!
-    pin_memory=True     # GPU transfer optimization
-)
-```
-
----
-
-## Troubleshooting
-
-### Issue 1: "Kernel Restarted" / "Out of Compute Units"
-
-**Symptom:** Colab disconnects mid-training
-
-**Cause:** Free tier quota exhausted
-
-**Solutions:**
-1. Wait 24 hours for quota reset
-2. Upgrade to Colab Pro ($10/month)
-3. Train during fresh session (morning)
-
-### Issue 2: Loss = 1500+ (Not Learning)
-
-**Symptom:** Extremely high loss, no improvement
-
-**Cause:** Features not normalized
-
-**Solution:** Apply log-scaling to pT
-```python
-x[:, 0] = torch.log(x[:, 0] + 1e-8)
-```
-
-### Issue 3: Training Extremely Slow (170 sec/batch)
-
-**Symptom:** Hours per epoch
-
-**Cause:** Google Drive I/O bottleneck
-
-**Solutions:**
-1. Copy data to local disk (see Performance Optimization)
-2. Train on subset (100k events)
-3. Use pre-cached files
-
-### Issue 4: GPU Utilization = 0%
-
-**Symptom:** GPU not being used
-
-**Cause:** 99% of time spent loading data from disk
-
-**Solution:** This is normal if I/O is slow. GPU bursts to 100% during actual computation (0.04 sec), then waits for next batch (143 sec). Fix the I/O bottleneck.
-
-### Issue 5: "KeyError" in Cached Dataset
-
-**Symptom:** Cache lookup fails
-
-**Cause:** Bug in cache eviction logic
-
-**Solution:** Use corrected cache class
-```python
-if len(self._cache) > 20:
-    keys_to_keep = sorted(self._cache.keys())[-20:]
-    self._cache = {k: self._cache[k] for k in keys_to_keep}
-```
-
-### Issue 6: DataLoader Hanging at 0%
-
-**Symptom:** Progress bar stuck at 0%, no movement
-
-**Cause:** Multiprocessing workers hanging on Colab
-
-**Solution:** Set `num_workers=0` in all DataLoaders
-```python
-train_loader = DataLoader(..., num_workers=0, ...)
-```
-
----
-
-## Expected Results
-
-### Training Progress
-```
-Epoch  1/50 | Train: 0.234567 | Val: 0.198765 | ⭐ NEW BEST
-Epoch  5/50 | Train: 0.123456 | Val: 0.108765 | ⭐ NEW BEST
-Epoch 10/50 | Train: 0.098765 | Val: 0.087654 | ⭐ NEW BEST
-Epoch 20/50 | Train: 0.078901 | Val: 0.076543 | ⭐ NEW BEST
-Early stopping!
-```
-
-### Final Metrics
-- **Background reconstruction error:** 0.08 ± 0.02
-- **Anomaly reconstruction error:** 0.45 ± 0.15
-- **Separation factor:** ~5-6x
-- **Training time:** 20-30 epochs (~10-15 hours on Colab)
-
----
-
-## Advanced: Chamfer Distance Loss
-
-For better permutation invariance (mentioned in README), use Chamfer Distance instead of MSE:
-
-```python
-def chamfer_distance(x, y):
-    """
-    Compute Chamfer distance between two point clouds.
-    Permutation-invariant unlike MSE.
-    """
-    # x: [N, 3], y: [N, 3]
-    
-    # For each point in x, find nearest point in y
-    dist_x_to_y = torch.cdist(x, y)  # [N, N]
-    min_dist_x = dist_x_to_y.min(dim=1)[0]  # [N]
-    
-    # For each point in y, find nearest point in x
-    min_dist_y = dist_x_to_y.min(dim=0)[0]  # [N]
-    
-    # Chamfer distance
-    chamfer = min_dist_x.mean() + min_dist_y.mean()
-    return chamfer
-
-# Use in training loop
-loss = chamfer_distance(x_recon, batch.x)
-```
-
-**When to use:**
-- Chamfer Distance: Better for unordered particle sets
-- MSE: Simpler, faster, works well with our graph structure
-
----
-
-## Next Steps
-
-After training completes:
-
-1. **Load best checkpoint**
-   ```python
-   model.load_state_dict(torch.load('best_model.pt'))
+   ```bash
+   python main.py prepare-part1 --config configs/part1_notebook_parity.yaml
    ```
 
-2. **Compute anomaly scores on test set**
-   ```python
-   model.eval()
-   scores = []
-   labels = []
-   
-   with torch.no_grad():
-       for batch in test_loader:
-           batch = batch.to(device)
-           z = model.encode(batch.x, batch.edge_index, batch.batch)
-           x_recon = model.decode(z, batch.batch)
-           
-           # Reconstruction error per graph
-           mse = F.mse_loss(x_recon, batch.x, reduction='none')
-           graph_errors = scatter_mean(mse.mean(dim=1), batch.batch)
-           
-           scores.extend(graph_errors.cpu().numpy())
-           labels.extend(batch.y.cpu().numpy())
+2. Train and evaluate the model:
+
+   ```bash
+   python scripts/run_part1_eval.py --config configs/part1_notebook_parity.yaml
    ```
 
-3. **Visualize results**
-   ```python
-   import matplotlib.pyplot as plt
-   from sklearn.metrics import roc_curve, auc
-   
-   # Score distribution
-   plt.figure(figsize=(10, 5))
-   plt.hist(scores[labels==0], bins=50, alpha=0.5, label='Background')
-   plt.hist(scores[labels==1], bins=50, alpha=0.5, label='Anomaly')
-   plt.xlabel('Reconstruction Error')
-   plt.ylabel('Count')
-   plt.legend()
-   plt.title('Anomaly Detection Performance')
-   
-   # ROC curve
-   fpr, tpr, _ = roc_curve(labels, scores)
-   roc_auc = auc(fpr, tpr)
-   
-   plt.figure(figsize=(8, 8))
-   plt.plot(fpr, tpr, label=f'ROC (AUC = {roc_auc:.3f})')
-   plt.plot([0, 1], [0, 1], 'k--')
-   plt.xlabel('False Positive Rate')
-   plt.ylabel('True Positive Rate')
-   plt.title('ROC Curve - Anomaly Detection')
-   plt.legend()
+3. To use a different seed, add `--seed N`.
+
+### 2.2 Settings
+
+The values are in `configs/part1_notebook_parity.yaml`:
+
+| Setting | Value |
+|---|---|
+| Optimizer | Adam |
+| Learning rate | 0.005 |
+| Weight decay | 0 |
+| Epochs | 5 |
+| Batch size | 256 |
+| Loss | `pt_only` (MSE of the standardized log pT) |
+| Dropout | 0.1 |
+| Training set | 40,000 background events |
+| Score | `max` (largest particle error) |
+
+These settings are the same as in the notebook. The notebook did not use a seed. The repository uses
+`training.seed: 0`.
+
+### 2.3 Outputs
+
+| File | Contents |
+|---|---|
+| `results/models/part1_purified_baseline.pt` | Trained model |
+| `results/scores/part1_metrics.json` | AUC, bootstrap 95% confidence interval, seed |
+| `results/scores/part1_scores.npz` | Score and label of each test event (`scores_max`, `scores_mean`) |
+| `results/figures/part1_roc.png` | ROC curve |
+
+### 2.4 Expected results
+
+| Value | Expected |
+|---|---|
+| Training loss | approximately 0.62 at the start, approximately 0.51 at the end |
+| AUC (`max`) | 0.483 ± 0.005 (seeds 0 to 4) |
+| AUC (`mean`) | 0.781 (seed 0) |
+| Time for one seed | 53 to 81 s on one T4 |
+
+### 2.5 Training on the full file
+
+The command `train-default` trains on graph chunks of the full file:
+
+1. Make the chunks: `python scripts/process_h5.py`.
+2. Train: `python main.py train-default`. The default configuration is `configs/default_search.yaml`. To use a different file, add `--config <file>`.
+
+This command uses AdamW and selects the background events with `labels.npy`.
+
+## 3. Part 2
+
+### 3.1 Procedure
+
+1. Make the event cache:
+
+   ```bash
+   python scripts/part2_run.py prepare --config configs/part2_main.yaml
    ```
 
-4. **Analyze top anomalies**
-   ```python
-   # Get indices of top anomalies
-   top_k = 100
-   top_anomaly_indices = np.argsort(scores)[-top_k:]
-   
-   print(f"Top {top_k} anomalies:")
-   for idx in top_anomaly_indices:
-       print(f"  Event {idx}: Score = {scores[idx]:.6f}, Label = {labels[idx]}")
+2. Train the three main seeds:
+
+   ```bash
+   python scripts/part2_sweep.py --stage main --config configs/part2_main.yaml
    ```
 
----
+3. Calculate the baselines (the "bank"). To include the Part 1 scores, add an `--external` option for each
+   score:
 
-## Performance Benchmarks
+   ```bash
+   python scripts/part2_run.py bank --config configs/part2_main.yaml \
+       --external "Part 1 AE (max)=<scores.npz>:scores_max" \
+       --external "Part 1 AE (mean)=<scores.npz>:scores_mean"
+   ```
 
-### Colab Free Tier (T4 GPU)
+4. Make the report:
 
-**With subset training (100k events):**
-- Training: ~30 min/epoch
-- Validation: ~10 min/epoch
-- Total: ~40 min/epoch
-- Full run (30 epochs): ~20 hours
+   ```bash
+   python scripts/part2_run.py report --config configs/part2_main.yaml --tags main --name stage1
+   ```
 
-**With full dataset (700k events) - NOT RECOMMENDED:**
-- Data loading bottleneck dominates
-- ~4-6 hours per epoch
-- Impractical on free tier
+To train one seed only, use `python scripts/part2_run.py train --config configs/part2_main.yaml --seed 0 --tag main`.
 
-### Local Training (RTX 3080)
+To change a configuration value, add `--set key=value`. For example: `--set model.latent_dim=8`.
 
-**With local NVMe SSD:**
-- Training: ~10 min/epoch (full 700k)
-- Validation: ~3 min/epoch
-- Total: ~13 min/epoch
-- Full run: ~6-7 hours
+### 3.2 Settings
 
----
+The values are in `configs/part2_main.yaml`:
 
-## Tips for Success
+| Setting | Value |
+|---|---|
+| Optimizer | AdamW |
+| Learning rate | 0.001 |
+| Weight decay | 0.00001 |
+| Epochs | 30 (maximum) |
+| Early stop | after 5 epochs without a better validation loss |
+| Batch size | 256 |
+| Gradient clip | 5.0 (norm) |
+| Loss | Symmetric Chamfer distance |
+| Training set | 180,000 background events |
+| Validation set | 20,000 background events |
 
-1. **Start small:** Train on 10k events first to verify pipeline works
-2. **Monitor early:** Watch first 3 epochs - loss should drop steadily
-3. **Save often:** Checkpoint every epoch to Drive
-4. **Use tensorboard:** Track training curves
-5. **Validate assumptions:** Run security checks, verify normalization
-6. **Be patient:** First epoch is slowest (cache warming)
+### 3.3 Checks during training
 
----
+`train_event_ae()` in `src/training/event_trainer.py` does these checks in each epoch:
 
-## Citation
+- If the training loss or the validation loss is not finite, the training stops with `TrainingError`.
+- If the largest standard deviation of a latent dimension is less than `collapse_std` (0.0001), the training
+  stops. This means that the latent space collapsed.
 
-If you use this training pipeline in your research, please cite:
+At the end, the model goes back to the epoch with the best validation loss.
 
-```bibtex
-@software{hidden_vertex,
-  title={The Hidden Vertex: Unsupervised Anomaly Detection in Particle Physics},
-  author={Your Name},
-  year={2026},
-  url={https://github.com/yourusername/vertex}
-}
-```
+The training writes a line for each epoch: the training loss, the validation loss, the largest latent standard
+deviation and the time.
 
----
+### 3.4 Outputs
 
-**Good luck with training!** 🚀
+Each run writes to `results/part2/runs/<tag>/`:
 
-For questions or issues, please open an issue on GitHub or refer to:
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Model details
-- [DATA.md](DATA.md) - Dataset documentation
-- [PHYSICS.md](PHYSICS.md) - Physics background
+| File | Contents |
+|---|---|
+| `metrics_s<seed>.json` | AUCs, settings, loss history |
+| `scores_s<seed>.npz` | Chamfer, kNN and GMM score, label and HDF5 row of each test event |
+| `model_s<seed>.pt` | Model weights, feature means and standard deviations, configuration |
+| `latents_fit_s<seed>.npy` | Latents of the 180,000 training events |
+
+The scores file is written last. If it exists, the run is complete. `part2_sweep.py` does not repeat a complete
+run. Thus, if a run stops because of a time limit, start the sweep again and it continues.
+
+### 3.5 Sweep stages
+
+| Stage | Runs |
+|---|---|
+| `main` | Main configuration, seeds 0, 1 and 2 |
+| `ablations` | Latent 4, 8, 32; K = 24, 96; depth 2, 4; no pT-weighted pooling; pT-weighted loss. Seeds 0 and 1. |
+| `contamination` | 9% and 1% signal in the training set. Seed 0. |
+
+The sweep starts one training process for each GPU.
+
+### 3.6 Expected results
+
+| Value | Expected |
+|---|---|
+| Best validation loss | 0.12 to 0.13 |
+| Time for one epoch | approximately 34 s on one T4 |
+| Time for one seed | approximately 18 min |
+| AUC (Chamfer / kNN / GMM), seed 0 | 0.419 / 0.405 / 0.448 |
+
+A new training run on Kaggle T4 GPUs gave the same AUCs as the original runs for all three seeds.
+
+## 4. Kaggle procedure
+
+The repository makes Kaggle script kernels that contain the full code:
+
+1. Make the kernel:
+
+   ```bash
+   python scripts/kaggle_bundle.py --slug hidden-vertex-part2-stage1 --title "Hidden Vertex Part2 Stage1" \
+       --body scripts/kaggle/part2_stage1.py --out <directory>
+   ```
+
+2. Send it to Kaggle:
+
+   ```bash
+   kaggle kernels push -p <directory>
+   ```
+
+3. Get the outputs when the run is complete:
+
+   ```bash
+   kaggle kernels output viveriun/hidden-vertex-part2-stage1 -p <directory>
+   ```
+
+The kernel uses two T4 GPUs and the dataset `atulchikku/lhc-olympics-2020-ad-r-and-d`. The kernel bodies for
+each stage are in `scripts/kaggle/`. The kernel `part2_release.py` keeps the checkpoints. The other kernels
+delete them to save space.
+
+## 5. Reproducibility
+
+- Each run uses a seed. Part 1: `training.seed` or `--seed`. Part 2: `--seed`.
+- Repeated runs with the same seed give the same AUC on the same hardware.
+- The Part 2 test set is fixed. All runs use the same 10,000 test events.
+- The sign of each score was fixed before the test: a higher score means a more anomalous event.
+
+## 6. Problems and solutions
+
+| Problem | Cause | Solution |
+|---|---|---|
+| The Part 1 test set has no signal events | The v2 file is sorted, and `scan_limit` is too small | Set `scan_limit: null` |
+| `cache ... was built with different split/max_particles settings` | The configuration changed after the cache was made | Delete the cache or set a different `data.cache_dir` |
+| More than 2% of the events are truncated | `data.max_particles` is too small | Increase `data.max_particles` (default 350) |
+| `TrainingError: latent collapsed` | The latent space collapsed | Examine the learning rate and the loss settings |
+| `KeyError: 'mean'` when the code reads `norm_stats.pt` | An old version of the code | Use the current code. It reads `feat_mean` and `feat_std`. |
