@@ -71,7 +71,8 @@ def test_run_training_writes_scores_and_skips_existing(tiny_cfg):
     metrics = run_training(tiny_cfg, seed=0, tag='main')
     run_dir = os.path.join(tiny_cfg['output_dir'], 'runs', 'main')
     scores = np.load(os.path.join(run_dir, 'scores_s0.npz'))
-    assert set(scores.files) == {'chamfer', 'knn', 'gmm', 'labels'}
+    assert set(scores.files) == {'chamfer', 'knn', 'gmm', 'labels', 'rows'}
+    assert len(np.unique(scores['rows'])) == 60
     assert all(scores[k].shape == (60,) and np.isfinite(scores[k]).all() for k in ('chamfer', 'knn', 'gmm'))
     assert scores['labels'].tolist() == [0] * 30 + [1] * 30
     assert set(metrics['auc']) == {'chamfer', 'knn', 'gmm'} and metrics['n_contaminating_signal'] == 0

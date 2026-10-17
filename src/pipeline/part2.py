@@ -170,6 +170,7 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     val_np = train_bg.particles[n_fit:]
     test_np = np.concatenate([test_bg.particles, test_sig.particles])
     y = np.r_[np.zeros(len(test_bg.rows)), np.ones(len(test_sig.rows))].astype(int)
+    test_rows = np.concatenate([test_bg.rows, test_sig.rows]).astype(np.int64)
 
     fit_t = torch.from_numpy(fit_np).to(device)
     val_t = torch.from_numpy(val_np).to(device)
@@ -198,7 +199,11 @@ def run_training(cfg, seed, contamination=None, tag='main'):
                            f'(expected n_fit={len(fit_np)})')
     scores = {'chamfer': chamfer_test, 'knn': scorers['knn'].score(z_test), 'gmm': scorers['gmm'].score(z_test)}
 
-    torch.save({'model_state_dict': model.state_dict(), 'config': cfg}, os.path.join(run_dir, f'model_s{seed}.pt'))
+    # Feature stats and training latents are saved so the checkpoint can score new events and refit kNN/GMM.
+    torch.save({'model_state_dict': model.state_dict(), 'feature_mean': ctx.stats.mean.cpu(),
+                'feature_std': ctx.stats.std.cpu(), 'config': cfg},
+               os.path.join(run_dir, f'model_s{seed}.pt'))
+    np.save(os.path.join(run_dir, f'latents_fit_s{seed}.npy'), z_fit.astype(np.float32))
     metrics = {
         'tag': tag, 'seed': seed, 'contamination': contamination, 'n_contaminating_signal': n_sig,
         'n_fit': int(len(fit_np)), 'n_val': int(len(val_np)),
@@ -216,7 +221,7 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     # Atomic (np.savez appends .npz to names lacking it, and the temp name must not match the scores_s*.npz glob).
     tmp_scores = os.path.join(run_dir, f'tmp_scores_s{seed}.npz')
     try:
-        np.savez(tmp_scores, labels=y, **scores)
+        np.savez(tmp_scores, labels=y, rows=test_rows, **scores)
         os.replace(tmp_scores, scores_path)
     finally:
         if os.path.exists(tmp_scores):
