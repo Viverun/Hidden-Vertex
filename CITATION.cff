@@ -5,7 +5,8 @@ authors:
   - family-names: Khan
     given-names: Jamil
     email: khanjamilahmed202@gmail.com
-version: 1.1.0
+    orcid: "https://orcid.org/0009-0007-1762-0416"
+version: 1.1.1
 date-released: 2026-10-17
 license: MIT
 repository-code: "https://github.com/Viverun/Hidden-Vertex"

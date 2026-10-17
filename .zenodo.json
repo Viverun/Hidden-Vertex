@@ -3,8 +3,27 @@
   "upload_type": "publication",
   "publication_type": "preprint",
   "description": "Preprint and full code. Graph autoencoders trained on background-only events of the LHC Olympics 2020 R&D dataset give inverted anomaly scores (AUC 0.40-0.44), while the label-free mean transverse momentum per particle (HT/N) reaches AUC 0.811. Correlation and within-bin analyses link the inversion of the latent-density scores to event complexity. The paper is in paper/main.pdf.",
-  "creators": [{"name": "Khan, Jamil", "affiliation": "Independent researcher"}],
+  "creators": [
+    {
+      "name": "Khan, Jamil",
+      "affiliation": "Independent researcher",
+      "orcid": "0009-0007-1762-0416"
+    }
+  ],
   "license": "MIT",
-  "keywords": ["anomaly detection", "graph neural networks", "autoencoders", "LHC Olympics 2020", "high energy physics", "machine learning"],
-  "related_identifiers": [{"identifier": "https://github.com/Viverun/Hidden-Vertex", "relation": "isSupplementTo", "scheme": "url"}]
+  "keywords": [
+    "anomaly detection",
+    "graph neural networks",
+    "autoencoders",
+    "LHC Olympics 2020",
+    "high energy physics",
+    "machine learning"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Viverun/Hidden-Vertex",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
 }
