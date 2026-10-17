@@ -2,7 +2,7 @@
   "title": "When Graph Autoencoders Look the Wrong Way: Complexity Bias and Simple Baselines in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset (preprint and code)",
   "upload_type": "publication",
   "publication_type": "preprint",
-  "description": "Preprint and full code. Graph autoencoders trained on background-only events of the LHC Olympics 2020 R&D dataset give inverted anomaly scores (AUC 0.40-0.44), while the label-free mean transverse momentum per particle (HT/N) reaches AUC 0.811. Correlation and within-bin analyses link the inversion of the latent-density scores to event complexity. The paper is in paper/main.pdf.",
+  "description": "Preprint and full code. Graph autoencoders trained on background-only events of the LHC Olympics 2020 R&D dataset give inverted anomaly scores (AUC 0.40-0.44), while the label-free mean transverse momentum per particle (HT/N) reaches AUC 0.811. Correlation and within-bin analyses link the inversion of the latent-density scores to event complexity. The paper is in paper/main.pdf. Trained checkpoints and per-event test scores: https://huggingface.co/Viverun/lhco-rnd-event-gae.",
   "creators": [
     {
       "name": "Khan, Jamil",
@@ -23,6 +23,11 @@
     {
       "identifier": "https://github.com/Viverun/Hidden-Vertex",
       "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://huggingface.co/Viverun/lhco-rnd-event-gae",
+      "relation": "isSupplementedBy",
       "scheme": "url"
     }
   ]
