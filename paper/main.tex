@@ -30,28 +30,27 @@
 {\LARGE\bfseries When Graph Autoencoders Look the Wrong Way:\\[0.4em]
 \Large Complexity Bias and Simple Baselines in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset\par}
 \vspace{1.2cm}
-{\large Jamil \textsc{[Surname]}\footnote{\href{mailto:AUTHOR_EMAIL}{AUTHOR\_EMAIL}}\par}
+{\large Jamil Khan\footnote{\href{mailto:khanjamilahmed202@gmail.com}{khanjamilahmed202@gmail.com}}\par}
 \vspace{0.3cm}
-{\itshape [Affiliation / Independent researcher]\par}
+{\itshape Independent researcher; undergraduate student in Computer Engineering\par}
 \vspace{1.5cm}
 \begin{abstract}
 \noindent
-We study unsupervised graph autoencoders (GAEs) for model-agnostic new-physics searches on the
-LHC Olympics 2020 R\&D dataset, in which a $W'\to XY\to(q\bar q)(q\bar q)$ dijet resonance is hidden in
-QCD background. Events are represented as particle graphs and models are trained on background only.
-Two designs are evaluated with multiple seeds, bootstrap confidence intervals and a decision criterion
-fixed before any test-set result: a node-level GAE that scores per-particle reconstruction error, and an
-event-level GAE with permutation-invariant pooling, a set decoder with a Chamfer loss, and three anomaly
-scores (reconstruction, latent $k$-nearest-neighbour distance, latent Gaussian-mixture likelihood).
-Neither model beats simple label-free event observables. The node-level model reaches an AUC of
+Graph autoencoders (GAEs) trained only on background are a natural candidate for model-agnostic
+new-physics searches. I tested two of them on the LHC Olympics 2020 R\&D dataset, where a
+$W'\to XY\to(q\bar q)(q\bar q)$ dijet resonance is hidden in QCD background. The first is a node-level
+GAE that scores per-particle reconstruction error. The second encodes the whole event, reconstructs it
+with a set decoder and a Chamfer loss, and offers three scores: reconstruction error, latent
+$k$-nearest-neighbour distance and latent Gaussian-mixture likelihood. The decision criterion was fixed
+before looking at any test result. Neither model beats simple label-free observables. The node-level model reaches an AUC of
 $0.483\pm0.005$ with max-reduction and $0.781$ with mean-reduction; all three event-level scores are
 \emph{inverted}, with AUCs between $0.401$ and $0.436$, stable across seeds, nine ablations, and
 signal-contaminated training. By contrast, the mean transverse momentum per particle,
 $\ptmean=\HT/N$, reaches $0.811$, and $-\tauTO$ of the leading jet reaches $0.801$.
 Correlation and binned analyses indicate that the latent-density scores track event complexity: the
 signal has fewer, harder particles than QCD and is therefore placed in dense regions of the learned
-manifold. We release the full benchmark harness and argue that \ptmean should be a standard reference
-baseline for unsupervised methods on this dataset.
+manifold. The benchmark code is public, and I suggest \ptmean as a standard reference baseline for
+unsupervised methods on this dataset.
 \end{abstract}
 \end{center}
 \vfill
@@ -69,11 +68,11 @@ established a common benchmark for this task, and autoencoders, in which events 
 reconstruction error are treated as anomalous, are among the most widely studied unsupervised
 approaches~\cite{Farina:2018fyg,Heimel:2018mkt,Finke:2021sdf,Atkinson:2021nlt}.
 
-It is known that autoencoder anomaly scores can be dominated by the overall complexity of
-an input rather than its physical atypicality: for jet images, for example, low-complexity
-signals can be \emph{easier} to reconstruct than background~\cite{Finke:2021sdf}. In this
-paper we report a controlled test of this effect for \emph{particle-graph} autoencoders on whole
-events. Our contributions are:
+Autoencoder scores have a known weakness: they can end up measuring how complex an input is
+rather than how unusual it is. For jet images, simple signal jets turn out to be \emph{easier} to
+reconstruct than QCD jets~\cite{Finke:2021sdf}. This project started as an attempt to build a
+working graph-based detector, and ran into the same problem for particle graphs of whole events.
+This paper documents what happened:
 \begin{enumerate}
   \item a reproducible benchmark harness on the public LHCO R\&D data, with a frozen test set,
         multi-seed runs, bootstrap confidence intervals and within-bin AUCs that test whether
@@ -85,14 +84,14 @@ events. Our contributions are:
         systematically inverted, with ablations, a contamination study, and a correlation-based
         diagnosis that links the latent-density inversion to event complexity.
 \end{enumerate}
-We regard these as useful mainly as a cautionary reference: an unsupervised model on this dataset
-should be compared against \ptmean before claiming to have learned more than the energy and
-multiplicity scale of an event.
+None of this is a working anomaly detector. The practical point is simpler: before claiming that
+an unsupervised model has learned something on this dataset, compare it with \ptmean. If it cannot
+beat a ratio of two event totals, it has probably only learned the energy and multiplicity scale.
 
 \section{Dataset and test protocol}
 \label{sec:data}
 
-We use the LHCO 2020 R\&D dataset~\cite{Kasieczka:2021xcg,LHCO:zenodo}. Background consists of
+I use the LHCO 2020 R\&D dataset~\cite{Kasieczka:2021xcg,LHCO:zenodo}. Background consists of
 QCD dijet events and signal of $W'\to XY$ with $m_{W'}=3.5$~TeV, $m_X=500$~GeV and
 $m_Y=100$~GeV, each of $X$ and $Y$ decaying to two quarks. Events were generated with
 \textsc{Pythia}~8~\cite{Sjostrand:2014zea} and the \textsc{Delphes}~3~\cite{deFavereau:2013fsa}
@@ -101,23 +100,23 @@ $(\pt,\eta,\phi)$. Jet-level features (anti-$k_t$~\cite{Cacciari:2008gp} $R=1$ j
 $N$-subjettiness ratios~\cite{Thaler:2010tr} and \mjj) are taken from the accompanying
 feature file.
 
-The publicly available file \texttt{events\_anomalydetection\_v2.h5} is \emph{sorted}: rows
+One practical warning first: the publicly available file \texttt{events\_anomalydetection\_v2.h5} is \emph{sorted}: rows
 $0$--$999{,}999$ are background and rows $\geq 1{,}000{,}000$ are signal. Any pipeline that
-reads a prefix of the file therefore sees no signal at all; we select events explicitly by row
+reads a prefix of the file therefore sees no signal at all; I select events explicitly by row
 index. The test set is frozen across all experiments: $5{,}000$ background events
 (rows $40{,}000$--$44{,}999$) and $5{,}000$ signal events (rows $1{,}000{,}000$--$1{,}004{,}999$).
 Models are trained on $180{,}000$ background-only events (rows $\geq 45{,}000$) with a
 $20{,}000$-event background validation set.
 
 \paragraph{Metrics.}
-We report the ROC AUC with bootstrap confidence intervals over the $10{,}000$ test events
+I report the ROC AUC with bootstrap confidence intervals over the $10{,}000$ test events
 (95\% for baselines; 98.3\% for the three model scores, a Bonferroni correction for three
 comparisons). To test whether a score carries information beyond trivial event quantities,
-we also compute the AUC \emph{within bins} of \HT, particle multiplicity $N$, and leading-particle
+I also compute the AUC \emph{within bins} of \HT, particle multiplicity $N$, and leading-particle
 \pt. The sign of every score (``larger = more anomalous'') is fixed in advance.
 
 \paragraph{Decision criterion.}
-Before any test result for the event-level model, we fixed the following gate: a model score
+Before any test result for the event-level model, I fixed the following gate: a model score
 passes only if the lower bound of its seed-averaged AUC interval exceeds the best particle-level
 baseline, and its minimum within-bin AUC is at least $0.6$.
 
@@ -150,7 +149,7 @@ log-likelihood of the latent under an 8-component Gaussian mixture fitted to tra
 \subsection{Reference baselines}
 
 Table~\ref{tab:baselines} lists label-free event observables evaluated on the frozen test set.
-The harness reproduces our earlier node-level numbers exactly (\HT $0.792$, \mjj $0.788$,
+The harness reproduces my earlier node-level numbers exactly (\HT $0.792$, \mjj $0.788$,
 node-level GAE $0.478$/$0.781$, each inside its interval). The strongest particle-level observable
 is \ptmean (AUC $0.811$), which exceeds \HT because it combines the higher energy scale of signal
 with its lower multiplicity (mean $N=140$ for signal vs.\ $182$ for background). The
@@ -280,7 +279,7 @@ The Chamfer score behaves differently: it barely tracks multiplicity ($\rho=+0.0
 bins (down to $0.31$). Its inversion is therefore not explained by multiplicity alone, and its
 origin remains open. The three scores are only moderately correlated with one another (Chamfer--$k$NN
 $0.53$, Chamfer--GMM $0.42$, $k$NN--GMM $0.87$). Flipping the sign post hoc would give AUCs of
-$0.56$--$0.60$, still far below \ptmean. We report this only to show that the scores contain a
+$0.56$--$0.60$, still far below \ptmean. I mention this only to show that the scores contain a
 weak complexity signal rather than noise; it is not a result.
 
 \begin{table}[t]
@@ -303,7 +302,7 @@ GMM     & $+0.02$ / $+0.18$ / $0.00$ & $+0.23$ / $+0.27$ / $+0.15$ & $+0.01$ / $
 \section{Discussion and outlook}
 \label{sec:discussion}
 
-Our results add to the evidence that autoencoder-based anomaly scores are vulnerable to
+These results add to the evidence that autoencoder-based anomaly scores are vulnerable to
 complexity bias~\cite{Finke:2021sdf}, and extend it to particle-graph representations of
 full events. Two practical lessons follow. First, unsupervised methods on the LHCO R\&D data
 should be compared not only with \HT but with \ptmean, which already reaches AUC $0.81$ without
@@ -332,7 +331,7 @@ All code, configurations, and the benchmark harness are available at the public 
 reports are in \texttt{docs/PART1\_VERIFICATION.md} and \texttt{docs/PART2\_RESULTS.md}.
 
 \section*{Acknowledgements}
-We thank the organisers of the LHC Olympics 2020 for making the dataset public. Computations
+I thank the organisers of the LHC Olympics 2020 for making the dataset public. Computations
 were performed on Kaggle GPU notebooks.
 
 \bibliographystyle{unsrtnat}
