@@ -22,11 +22,12 @@ Train AI systems to learn **Standard Model (SM) physics so well** that anything
 unusual automatically stands out — enabling **model-independent discovery** of
 new physics.
 
-### Project Status (Feb 2026)
+### Project Status (Oct 2026)
 
-- **Part 1 is complete** and frozen as a baseline milestone.
-- The Part 1 conclusion is a **negative-but-useful result**: node-level bottlenecks did not separate event-level anomalies reliably.
-- **Part 2 is next** and focuses on global event representation learning.
+- **Part 1 (node-level GAE) is complete**: negative-but-useful result; max-reduction AUC 0.483 ± 0.005 (see `docs/PART1_VERIFICATION.md`).
+- **Part 2 (event-level GAE) is complete**: pre-registered gate **not passed**; all three anomaly scores are inverted (AUC 0.40–0.44), while the label-free mean pT per particle (HT/N) reaches **0.811** (see `docs/PART2_RESULTS.md`).
+- **Preprint**: `paper/main.pdf` (LaTeX source in `paper/`).
+- **Part 3** (jet-aware, complexity-controlled model) is next.
 
 For this reason, Part 1 should be interpreted as a validated infrastructure + physics baseline, not as a final anomaly detector.
 

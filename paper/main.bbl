@@ -1,0 +1,88 @@
+\begin{thebibliography}{12}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Kasieczka et~al.(2021)]{Kasieczka:2021xcg}
+Gregor Kasieczka et~al.
+\newblock {The LHC Olympics 2020: a community challenge for anomaly detection
+  in high energy physics}.
+\newblock \emph{Rept. Prog. Phys.}, 84:\penalty0 124201, 2021.
+\newblock \doi{10.1088/1361-6633/ac36b9}.
+
+\bibitem[Farina et~al.(2020)Farina, Nakai, and Shih]{Farina:2018fyg}
+Marco Farina, Yuichiro Nakai, and David Shih.
+\newblock {Searching for new physics with deep autoencoders}.
+\newblock \emph{Phys. Rev. D}, 101:\penalty0 075021, 2020.
+\newblock \doi{10.1103/PhysRevD.101.075021}.
+
+\bibitem[Heimel et~al.(2019)Heimel, Kasieczka, Plehn, and
+  Thompson]{Heimel:2018mkt}
+Theo Heimel, Gregor Kasieczka, Tilman Plehn, and Jennifer~M. Thompson.
+\newblock {QCD or What?}
+\newblock \emph{SciPost Phys.}, 6:\penalty0 030, 2019.
+\newblock \doi{10.21468/SciPostPhys.6.3.030}.
+
+\bibitem[Finke et~al.(2021)Finke, Kr{\"a}mer, Morandini, M{\"u}ck, and
+  Oleksiyuk]{Finke:2021sdf}
+Thorben Finke, Michael Kr{\"a}mer, Alessandro Morandini, Alexander M{\"u}ck,
+  and Ivan Oleksiyuk.
+\newblock {Autoencoders for unsupervised anomaly detection in high energy
+  physics}.
+\newblock \emph{JHEP}, 06:\penalty0 161, 2021.
+\newblock \doi{10.1007/JHEP06(2021)161}.
+
+\bibitem[Atkinson et~al.(2021)Atkinson, Bhardwaj, Englert, Ngairangbam, and
+  Spannowsky]{Atkinson:2021nlt}
+Oliver Atkinson, Akanksha Bhardwaj, Christoph Englert, Vishal~S. Ngairangbam,
+  and Michael Spannowsky.
+\newblock {Anomaly detection with convolutional graph neural networks}.
+\newblock \emph{JHEP}, 08:\penalty0 080, 2021.
+\newblock \doi{10.1007/JHEP08(2021)080}.
+
+\bibitem[Kasieczka et~al.(2019)Kasieczka, Nachman, and Shih]{LHCO:zenodo}
+Gregor Kasieczka, Benjamin Nachman, and David Shih.
+\newblock {Official datasets for LHC Olympics 2020 anomaly detection
+  challenge}, 2019.
+
+\bibitem[Sj{\"o}strand et~al.(2015)]{Sjostrand:2014zea}
+Torbj{\"o}rn Sj{\"o}strand et~al.
+\newblock {An introduction to PYTHIA 8.2}.
+\newblock \emph{Comput. Phys. Commun.}, 191:\penalty0 159--177, 2015.
+\newblock \doi{10.1016/j.cpc.2015.01.024}.
+
+\bibitem[de~Favereau et~al.(2014)]{deFavereau:2013fsa}
+J.~de~Favereau et~al.
+\newblock {DELPHES 3, a modular framework for fast simulation of a generic
+  collider experiment}.
+\newblock \emph{JHEP}, 02:\penalty0 057, 2014.
+\newblock \doi{10.1007/JHEP02(2014)057}.
+
+\bibitem[Cacciari et~al.(2008)Cacciari, Salam, and Soyez]{Cacciari:2008gp}
+Matteo Cacciari, Gavin~P. Salam, and Gregory Soyez.
+\newblock {The anti-$k_t$ jet clustering algorithm}.
+\newblock \emph{JHEP}, 04:\penalty0 063, 2008.
+\newblock \doi{10.1088/1126-6708/2008/04/063}.
+
+\bibitem[Thaler and Van~Tilburg(2011)]{Thaler:2010tr}
+Jesse Thaler and Ken Van~Tilburg.
+\newblock {Identifying boosted objects with N-subjettiness}.
+\newblock \emph{JHEP}, 03:\penalty0 015, 2011.
+\newblock \doi{10.1007/JHEP03(2011)015}.
+
+\bibitem[Kipf and Welling(2017)]{Kipf:2016gcn}
+Thomas~N. Kipf and Max Welling.
+\newblock {Semi-supervised classification with graph convolutional networks}.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2017.
+
+\bibitem[Fan et~al.(2017)Fan, Su, and Guibas]{Fan:2017chamfer}
+Haoqiang Fan, Hao Su, and Leonidas Guibas.
+\newblock {A point set generation network for 3D object reconstruction from a
+  single image}.
+\newblock In \emph{IEEE Conference on Computer Vision and Pattern Recognition
+  (CVPR)}, pages 605--613, 2017.
+
+\end{thebibliography}

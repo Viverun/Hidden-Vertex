@@ -647,7 +647,6 @@ If you use this work in your research, please cite:
 **Inspiration:**
 - Graph Neural Network pioneers (Kipf, Welling, et al.)
 - Particle physics ML community
-- Anthropic Claude (development assistance)
 
 ---
 
