@@ -29,6 +29,7 @@ new physics.
 - **Part 1 (node-level GAE) is complete**: negative-but-useful result; max-reduction AUC 0.483 ± 0.005 (see `docs/PART1_VERIFICATION.md`).
 - **Part 2 (event-level GAE) is complete**: pre-registered gate **not passed**; all three anomaly scores are inverted (AUC 0.40–0.44), while the label-free mean pT per particle (HT/N) reaches **0.811** (see `docs/PART2_RESULTS.md`).
 - **Preprint**: `paper/main.pdf` (LaTeX source in `paper/`), DOI [10.5281/zenodo.23432779](https://doi.org/10.5281/zenodo.23432779).
+- **Trained models**: the Part 2 event-level autoencoder (3 seeds), with per-event test scores and HDF5 row ids, at [huggingface.co/Viverun/lhco-rnd-event-gae](https://huggingface.co/Viverun/lhco-rnd-event-gae).
 - **Part 3** (jet-aware, complexity-controlled model) is next.
 
 For this reason, Part 1 should be interpreted as a validated infrastructure + physics baseline, not as a final anomaly detector.
