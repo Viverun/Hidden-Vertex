@@ -81,7 +81,7 @@ This paper documents what happened:
   \item a set of label-free reference baselines, among which the mean transverse momentum per
         particle, $\ptmean=\HT/N$, is the strongest particle-level observable
         (AUC $0.811$), above \HT, \mjj, and a node-level GAE;
-  \item a pre-registered negative result for an event-level GAE whose three anomaly scores are
+  \item a negative result, under a decision rule fixed in advance, for an event-level GAE whose three anomaly scores are
         systematically inverted, with ablations, a contamination study, and a correlation-based
         diagnosis that links the latent-density inversion to event complexity.
 \end{enumerate}
@@ -96,7 +96,7 @@ I use the LHCO 2020 R\&D dataset~\cite{Kasieczka:2021xcg,LHCO:zenodo}. Backgroun
 QCD dijet events and signal of $W'\to XY$ with $m_{W'}=3.5$~TeV, $m_X=500$~GeV and
 $m_Y=100$~GeV, each of $X$ and $Y$ decaying to two quarks. Events were generated with
 \textsc{Pythia}~8~\cite{Sjostrand:2014zea} and the \textsc{Delphes}~3~\cite{deFavereau:2013fsa}
-detector simulation, and are stored as up to 700 particle-flow candidates
+detector simulation, and are stored as up to 700 hadrons
 $(\pt,\eta,\phi)$. Jet-level features (anti-$k_t$~\cite{Cacciari:2008gp} $R=1$ jet masses,
 $N$-subjettiness ratios~\cite{Thaler:2010tr} and \mjj) are taken from the accompanying
 feature file.
@@ -161,7 +161,7 @@ is shown only as an oracle reference.
 \centering
 \caption{ROC AUC of label-free event observables and the node-level GAE on the frozen test set
 (5k signal, 5k background), with 95\% bootstrap intervals and the minimum AUC within bins of \HT,
-$N$ and leading \pt.}
+$N$ and leading \pt. Node-level GAE rows are from seed 0; over five seeds the max-reduction AUC is $0.483\pm0.005$.}
 \label{tab:baselines}
 \begin{tabular}{llccc}
 \toprule
@@ -322,7 +322,7 @@ whether their anomaly scores capture more than event complexity.
 
 \paragraph{Limitations.}
 All results use a single signal model and the R\&D dataset, not the LHCO black boxes. The
-event-level model was evaluated in one pre-registered configuration with limited ablations,
+event-level model was evaluated in one configuration fixed in advance with limited ablations,
 and the complexity explanation is correlational. Ablation and contamination runs use two or
 one seeds, so differences below $\sim0.02$ should not be interpreted.
 

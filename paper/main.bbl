@@ -44,8 +44,9 @@ Oliver Atkinson, Akanksha Bhardwaj, Christoph Englert, Vishal~S. Ngairangbam,
 
 \bibitem[Kasieczka et~al.(2019)Kasieczka, Nachman, and Shih]{LHCO:zenodo}
 Gregor Kasieczka, Benjamin Nachman, and David Shih.
-\newblock {Official datasets for LHC Olympics 2020 anomaly detection
-  challenge}, 2019.
+\newblock {R\&D Dataset for LHC Olympics 2020 Anomaly Detection Challenge},
+  2019.
+\newblock URL \url{https://doi.org/10.5281/zenodo.2629072}.
 
 \bibitem[Sj{\"o}strand et~al.(2015)]{Sjostrand:2014zea}
 Torbj{\"o}rn Sj{\"o}strand et~al.
