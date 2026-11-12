@@ -1,0 +1,23 @@
+epoch 01 | train 0.5646 | val 0.3063 | z_std_max 2.202 | 33.9s
+epoch 02 | train 0.2581 | val 0.2472 | z_std_max 2.199 | 33.6s
+epoch 03 | train 0.2168 | val 0.2215 | z_std_max 2.126 | 34.5s
+epoch 04 | train 0.1921 | val 0.2066 | z_std_max 2.154 | 35.6s
+epoch 05 | train 0.1782 | val 0.1954 | z_std_max 2.129 | 35.0s
+epoch 06 | train 0.1704 | val 0.1876 | z_std_max 2.014 | 35.2s
+epoch 07 | train 0.1626 | val 0.1784 | z_std_max 1.930 | 35.2s
+epoch 08 | train 0.1583 | val 0.1970 | z_std_max 1.577 | 35.0s
+epoch 09 | train 0.1539 | val 0.1713 | z_std_max 1.759 | 35.2s
+epoch 10 | train 0.1492 | val 0.1654 | z_std_max 1.738 | 35.2s
+epoch 11 | train 0.1457 | val 0.1616 | z_std_max 1.708 | 35.3s
+epoch 12 | train 0.1456 | val 0.1628 | z_std_max 1.516 | 35.2s
+epoch 13 | train 0.1435 | val 0.1566 | z_std_max 1.631 | 35.1s
+epoch 14 | train 0.1401 | val 0.1644 | z_std_max 1.659 | 35.1s
+epoch 15 | train 0.1379 | val 0.1525 | z_std_max 1.473 | 35.1s
+epoch 16 | train 0.1373 | val 0.1520 | z_std_max 1.282 | 35.0s
+epoch 17 | train 0.1361 | val 0.1501 | z_std_max 1.409 | 35.0s
+epoch 18 | train 0.1367 | val 0.1511 | z_std_max 1.380 | 35.1s
+epoch 19 | train 0.1372 | val 0.1704 | z_std_max 1.769 | 35.0s
+epoch 20 | train 0.1335 | val 0.1511 | z_std_max 1.738 | 35.1s
+epoch 21 | train 0.1341 | val 0.1624 | z_std_max 1.616 | 35.1s
+epoch 22 | train 0.1324 | val 0.1576 | z_std_max 1.774 | 35.1s
+run multmatch/s1: AUC {'chamfer': 0.41314239999999997, 'knn': 0.40759356, 'gmm': 0.42952875999999995}

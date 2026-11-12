@@ -1,0 +1,2 @@
+epoch 1: train W 1.3068 val W 1.3064 E+ 1.0007 E- 0.1735 lr 2.00e-04 (382 s)
+one epoch: 381.8 s with 4 threads

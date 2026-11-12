@@ -33,6 +33,8 @@ GRIDS = {
         ('contam9', ['split.contamination=0.09'], (0,)),
         ('contam1', ['split.contamination=0.01'], (0,)),
     ],
+    # Part 3C: fit set resampled so its multiplicity follows the signal reference (otherwise = main)
+    'multmatch': [('multmatch', ['split.match_multiplicity_to_signal=true'], (0, 1, 2))],
 }
 
 

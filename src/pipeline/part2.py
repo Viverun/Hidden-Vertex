@@ -132,6 +132,46 @@ def make_report(cfg, bank_path, run_tags=(), name='report'):
 
 
 LOSSES = ('chamfer', 'chamfer_ptw')
+MATCH_BINS = 30            # quantile bins of the fit-set multiplicity (Part 3C, fixed before any result)
+MATCH_CLIP_PERCENTILE = 99.5
+
+
+def multiplicity_match_resample(fit_mult, sig_mult, n_draw, seed, n_bins=MATCH_BINS,
+                                clip_percentile=MATCH_CLIP_PERCENTILE):
+    """Indices into the fit set, drawn with replacement so that the multiplicity distribution of the drawn
+    events follows the signal reference: w = p_sig(n) / p_bg(n) from histograms in quantile bins of the
+    fit-set multiplicity (signal values outside the range go to the outer bins), clipped at a percentile.
+    Returns (indices, diagnostics)."""
+    fit_mult = np.asarray(fit_mult, dtype=np.float64)
+    sig_mult = np.asarray(sig_mult, dtype=np.float64)
+    if len(fit_mult) == 0 or len(sig_mult) == 0:
+        raise ValueError('multiplicity matching needs a non-empty fit set and signal reference')
+    edges = np.unique(np.quantile(fit_mult, np.linspace(0, 1, n_bins + 1)))
+    n_eff_bins = max(len(edges) - 1, 1)
+
+    def bin_of(x):
+        return np.clip(np.searchsorted(edges, x, side='right') - 1, 0, n_eff_bins - 1)
+
+    b_fit, b_sig = bin_of(fit_mult), bin_of(sig_mult)
+    p_bg = np.bincount(b_fit, minlength=n_eff_bins) / len(fit_mult)
+    p_sig = np.bincount(b_sig, minlength=n_eff_bins) / len(sig_mult)
+    w = p_sig[b_fit] / p_bg[b_fit]          # every fit bin has >= 1 event, so p_bg > 0
+    clip = float(np.percentile(w, clip_percentile))
+    w = np.minimum(w, clip)
+    if w.sum() <= 0:
+        raise ValueError('all multiplicity-matching weights are zero')
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(len(fit_mult), size=int(n_draw), replace=True, p=w / w.sum())
+    diagnostics = {
+        'n_bins': int(n_eff_bins), 'clip_percentile': clip_percentile, 'weight_clip_value': clip,
+        'effective_sample_size': float(w.sum() ** 2 / np.sum(w ** 2)),
+        'n_unique_drawn': int(len(np.unique(idx))), 'n_drawn': int(n_draw),
+        'mean_multiplicity_fit_before': float(fit_mult.mean()),
+        'mean_multiplicity_fit_after': float(fit_mult[idx].mean()),
+        'mean_multiplicity_signal_reference': float(sig_mult.mean()),
+        'n_signal_reference': int(len(sig_mult)),
+    }
+    return idx, diagnostics
 
 
 def run_training(cfg, seed, contamination=None, tag='main'):
@@ -166,7 +206,18 @@ def run_training(cfg, seed, contamination=None, tag='main'):
     n_sig = int(round(contamination * n_fit))
     if n_sig > len(contam.rows):
         raise ValueError(f'contamination {contamination} needs {n_sig} signal events, cache has {len(contam.rows)}')
-    fit_np = np.concatenate([train_bg.particles[:n_fit - n_sig], contam.particles[:n_sig]])
+    match = bool(s.get('match_multiplicity_to_signal', False))
+    resample = None
+    if match:
+        # Part 3C: resample the pure-background fit set so its multiplicity follows the signal reference
+        # (contam_sig events: signal, not in the test set). The validation slice stays unweighted background.
+        if n_sig:
+            raise ValueError('split.match_multiplicity_to_signal needs contamination 0')
+        idx, resample = multiplicity_match_resample(train_bg.summary['multiplicity'][:n_fit],
+                                                    contam.summary['multiplicity'], n_fit, seed)
+        fit_np = train_bg.particles[:n_fit][idx]
+    else:
+        fit_np = np.concatenate([train_bg.particles[:n_fit - n_sig], contam.particles[:n_sig]])
     val_np = train_bg.particles[n_fit:]
     test_np = np.concatenate([test_bg.particles, test_sig.particles])
     y = np.r_[np.zeros(len(test_bg.rows)), np.ones(len(test_sig.rows))].astype(int)
@@ -215,6 +266,9 @@ def run_training(cfg, seed, contamination=None, tag='main'):
         'num_parameters': sum(p.numel() for p in model.parameters()),
         'history': history,
     }
+    if match:
+        metrics['match_multiplicity_to_signal'] = True
+        metrics['multiplicity_resample'] = resample
     with open(metrics_path, 'w', encoding='utf-8') as handle:
         json.dump(metrics, handle, indent=2)
     # The scores file is written last: it is the "run finished" marker (skip logic, scripts/part2_sweep.py).

@@ -1,0 +1,159 @@
+{
+  "info": {
+    "tag": "main",
+    "seed_files": [
+      "results/part2/runs/main/scores_s0.npz",
+      "results/part2/runs/main/scores_s1.npz",
+      "results/part2/runs/main/scores_s2.npz"
+    ],
+    "rows_in_score_files": false,
+    "n_test": 10000,
+    "n_sig": 5000
+  },
+  "settings": {
+    "n_bins_mult": 20,
+    "n_bins_2d": 8,
+    "clip_percentile": 99.0,
+    "n_boot": 1000,
+    "n_boot_valid": 1000,
+    "ci_level": 0.95,
+    "bootstrap_seed": 0,
+    "weights_recomputed_per_resample": true
+  },
+  "diagnostics": {
+    "mult": {
+      "clip_value": 2.8357142857142854,
+      "signal_fraction_in_cells_without_background": 0.0,
+      "n_cells": 20,
+      "bg_effective_sample_size": 2969.0799631048453,
+      "bg_fraction_zero_weight": 0.0,
+      "bg_mean_multiplicity_weighted": 139.68473580032187,
+      "bg_mean_ht_weighted": 2824.534259247513
+    },
+    "mult_ht": {
+      "clip_value": 13.642857142857142,
+      "signal_fraction_in_cells_without_background": 0.0,
+      "n_cells": 64,
+      "bg_effective_sample_size": 830.526945031519,
+      "bg_fraction_zero_weight": 0.0422,
+      "bg_mean_multiplicity_weighted": 141.9046155324111,
+      "bg_mean_ht_weighted": 3338.2408861636027
+    },
+    "unweighted": {
+      "bg_mean_multiplicity": 181.8384,
+      "sig_mean_multiplicity": 139.8678,
+      "bg_mean_ht": 2899.989543160373,
+      "sig_mean_ht": 3309.379807251186
+    }
+  },
+  "results": {
+    "EventAE chamfer": {
+      "n_seeds": 3,
+      "plain": {
+        "auc": 0.42803265333333335,
+        "ci_lo": 0.41798234732836465,
+        "ci_hi": 0.43894397053772766
+      },
+      "mult": {
+        "auc": 0.457232845533081,
+        "ci_lo": 0.4446661810102676,
+        "ci_hi": 0.4703253617077114
+      },
+      "mult_ht": {
+        "auc": 0.43775865282190884,
+        "ci_lo": 0.41540686070396554,
+        "ci_hi": 0.45930994484413185
+      }
+    },
+    "EventAE knn": {
+      "n_seeds": 3,
+      "plain": {
+        "auc": 0.40090659999999995,
+        "ci_lo": 0.39130461488164603,
+        "ci_hi": 0.4099491895714253
+      },
+      "mult": {
+        "auc": 0.4611067206871962,
+        "ci_lo": 0.4502750936547782,
+        "ci_hi": 0.4718931737023002
+      },
+      "mult_ht": {
+        "auc": 0.44798361326490954,
+        "ci_lo": 0.4298785955806151,
+        "ci_hi": 0.46301825701238253
+      }
+    },
+    "EventAE gmm": {
+      "n_seeds": 3,
+      "plain": {
+        "auc": 0.43634320000000004,
+        "ci_lo": 0.4270951495980322,
+        "ci_hi": 0.444754332311812
+      },
+      "mult": {
+        "auc": 0.4947439321775322,
+        "ci_lo": 0.4839901555836875,
+        "ci_hi": 0.5058031362312422
+      },
+      "mult_ht": {
+        "auc": 0.46951098494379107,
+        "ci_lo": 0.45088023281488554,
+        "ci_hi": 0.48546430404587876
+      }
+    },
+    "mean pT per particle": {
+      "n_seeds": 1,
+      "plain": {
+        "auc": 0.8114028,
+        "ci_lo": 0.8019671204465173,
+        "ci_hi": 0.8200024541414782
+      },
+      "mult": {
+        "auc": 0.670003221679899,
+        "ci_lo": 0.6631059704459407,
+        "ci_hi": 0.6763531501420902
+      },
+      "mult_ht": {
+        "auc": 0.5090025806482161,
+        "ci_lo": 0.4986207809098251,
+        "ci_hi": 0.5311957807370365
+      }
+    },
+    "HT (sum pT)": {
+      "n_seeds": 1,
+      "plain": {
+        "auc": 0.79221672,
+        "ci_lo": 0.7831491986396636,
+        "ci_hi": 0.8009766504989707
+      },
+      "mult": {
+        "auc": 0.8329079921116626,
+        "ci_lo": 0.8230764776143905,
+        "ci_hi": 0.8421439129035516
+      },
+      "mult_ht": {
+        "auc": 0.5096730733724901,
+        "ci_lo": 0.5024581026731032,
+        "ci_hi": 0.5215569412812882
+      }
+    },
+    "-multiplicity": {
+      "n_seeds": 1,
+      "plain": {
+        "auc": 0.71470132,
+        "ci_lo": 0.7034913874442741,
+        "ci_hi": 0.7250742744620149
+      },
+      "mult": {
+        "auc": 0.49948865019653527,
+        "ci_lo": 0.49869579025886446,
+        "ci_hi": 0.5003075132383956
+      },
+      "mult_ht": {
+        "auc": 0.5135290288136349,
+        "ci_lo": 0.5051452598241346,
+        "ci_hi": 0.53198734458581
+      }
+    }
+  }
+}
