@@ -38,11 +38,14 @@ For the details, see [`DATA.md`](DATA.md).
 |---|---|---|---|
 | 1 | Node-level GAE: GCN layers and a 1D latent for each particle | Can a bottleneck at the particle level find anomalies at the event level? | AUC 0.483 ± 0.005 (maximum error, 5 seeds). The score follows the pT of the leading particle. |
 | 2 | Event-level GAE: neighbour-averaging layers, pooling, a 16D latent for each event, Chamfer loss | Is a model with an event-level bottleneck better than simple baselines? | No. The three scores have an AUC of 0.40 to 0.44. The baseline HT/N gets 0.811. |
-| 3 | Jet-aware model with complexity control | Is a score that ignores particle multiplicity useful? | Not started. |
+| 3 | Jet-feature density scores, WNAE, complexity matching, CWoLa bump hunt | Can a jet-feature score or a complexity-matched model pass the gate? | No. The best label-free score gets 0.761. The bump hunt passes only with the known signal mass. See [`PART3_RESULTS.md`](PART3_RESULTS.md). |
 
 The main result is negative. In this dataset, signal events have fewer particles than background events, and
-their particles have higher pT. The autoencoder scores follow the event complexity. Thus, the model finds signal
-events more typical than background events.
+their particles have higher pT. The latent-density scores follow the event complexity, and the model finds signal
+events more typical than background events. Part 3 showed that complexity is at most a partial explanation:
+retraining on a multiplicity-matched background does not recover performance.
+
+The project is discontinued. No further work is planned.
 
 Simple variables that do not use labels separate the signal well:
 

@@ -120,7 +120,9 @@ such as jet mass, τ21 and mjj. The mean pT per particle is a particle-level var
      where the model reconstructs events easily.
    - The sign of the score was fixed before the test: "far from the training data means anomalous". With this
      sign, signal events in dense regions give an AUC below 0.5.
-   - The correlations suggest this explanation. No test of the cause was done.
+   - The correlations suggest this explanation. Part 2 did no test of the cause. Part 3 tested it: retraining
+     on a multiplicity-matched background does not recover performance. Thus, complexity is at most a partial
+     explanation (`docs/PART3_RESULTS.md`, Section 4).
 
    **The Chamfer score is different.** It has almost no correlation with multiplicity (ρ +0.08) or mean pT
    (ρ −0.07). It stays inverted in bins of multiplicity (0.41 to 0.48) and in bins of HT (as low as 0.31).
@@ -231,7 +233,10 @@ Part 2 gives these results:
 - A negative result with a partial explanation (for the latent-density scores only). The ablations and a
   contamination run support the result.
 
-Next steps, in the sequence of expected value (the fallback in the design is "adding jet-substructure inputs"):
+Next steps, in the sequence of expected value (the fallback in the design is "adding jet-substructure inputs").
+**Status:** Part 3 did the alternative in step 1 (reference models on jet features). Part 3 tested step 2 with
+matched evaluation and multiplicity-matched training, not with a conditioned model. No method passed the gate,
+and the project stopped. See `docs/PART3_RESULTS.md`.
 
 1. **Add jet-level inputs** to the encoder: jet masses, τ21 and mjj from the `.features.h5` file. As an
    alternative, make the reference autoencoder that uses jet features. The τ21 score alone, without labels,
@@ -265,7 +270,7 @@ Next steps, in the sequence of expected value (the fallback in the design is "ad
   the gate.
 - Small review notes that were not done are in the SDD ledger. The ledger is not in the repository.
 
-### Known limits and tasks for Part 3 (not fixed)
+### Known limits (not fixed)
 
 - Since commit d70e008, each scores file contains the HDF5 row number of each test event. The benchmark bank
   does not contain row numbers yet. The comparison of a run with the bank only checks the label vectors. Thus,

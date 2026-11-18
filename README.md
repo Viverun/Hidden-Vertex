@@ -22,17 +22,22 @@ The method is unsupervised anomaly detection:
 The data is the LHC Olympics 2020 R&D dataset. The background is QCD dijet events. The signal is a W′ → XY → (qq̄)(qq̄) resonance
 (m(W′) = 3.5 TeV, m(X) = 500 GeV, m(Y) = 100 GeV).
 
-## Project status (October 2026)
+## Results summary (November 2026)
 
 | Part | Model | Status | Result |
 |---|---|---|---|
 | 1 | Node-level GAE | Complete | AUC 0.483 ± 0.005 (max error). See `docs/PART1_VERIFICATION.md`. |
 | 2 | Event-level GAE | Complete | The pre-registered gate failed. See `docs/PART2_RESULTS.md`. |
-| 3 | Jet-aware model with complexity control | Next | Not started. |
+| 3 | Jet features, WNAE, complexity matching, bump hunt | Complete | No method passed the gate. See `docs/PART3_RESULTS.md`. |
 
 In Part 2, all three anomaly scores have an AUC of 0.40 to 0.44. An AUC below 0.5 means that the model
 gives background events higher scores than signal events. A simple variable without labels,
 the mean transverse momentum per particle (HT/N), gets an AUC of 0.811 on the same events.
+
+In Part 3, density scores on jet features get an AUC of 0.694 to 0.761. A Wasserstein-normalized
+autoencoder (WNAE) gets 0.637 to 0.721. Retraining on a multiplicity-matched background does not recover
+performance (0.399 to 0.424). A weakly supervised bump hunt gets 0.716 at S/B = 0.001. It passes the gate
+(0.835) only when it uses the known signal mass.
 
 Thus, the results are negative. The project gives a validated benchmark harness and a set of baselines.
 It does not give a final anomaly detector.
@@ -224,16 +229,35 @@ The model did not pass its pre-registered gate. The best particle-level baseline
 
 The signal events in this dataset have fewer particles than the QCD background, and their particles have
 higher pT. The latent-density scores find these events more typical than background events. This agrees
-with the AUC below 0.5. The cause of the inversion of the reconstruction-error score is not known.
+with the AUC below 0.5. Part 3 tested this explanation. Multiplicity matching in the evaluation reduces the inversion
+(AUC 0.457 to 0.495). Retraining on a multiplicity-matched background does not recover performance. Thus, complexity is at
+most a partial explanation. The cause of the inversion of the reconstruction-error score is not known.
 
 For the full report, see [`docs/PART2_RESULTS.md`](docs/PART2_RESULTS.md). For the design, see
 `docs/superpowers/specs/`.
 
-## Part 3: plan
+## Part 3: follow-up studies
 
-* Add jet-level inputs (jet masses, τ21, mjj) to the particle features.
-* Control the score for multiplicity and mean pT. Then the score measures the event structure at a
-  fixed complexity.
+Part 3 did five studies on the frozen Part 2 test set:
+
+1. kNN, GMM and MLP-autoencoder scores on jet features (jet masses, τ21, mjj).
+2. A WNAE on the same jet features (a pilot run and a long run).
+3. Complexity matching: matched evaluation of all scores, and retraining on a multiplicity-matched background.
+4. A reverse-direction diagnostic (trained on signal).
+5. A CWoLa bump hunt with injected signal, with a model-independent window grid and an oracle window.
+
+No label-free score passed the gate. The best is the kNN score without mjj (AUC 0.761).
+For the full report, the protocol and the pre-registered predictions, see
+[`docs/PART3_RESULTS.md`](docs/PART3_RESULTS.md).
+
+```bash
+python scripts/part3_run.py density            # Study A
+python scripts/part3_run.py report             # results/part3/jet_density.md and wnae.md
+python scripts/part3c_matched_eval.py          # matched evaluation of the Part 2 scores
+python scripts/part3c_all_scores_matched.py    # all scores under complexity matching
+python scripts/part3_run.py reverse            # reverse direction
+python scripts/part3_cwola.py all && python scripts/part3_cwola.py report   # bump hunt
+```
 
 ## Data
 
@@ -262,7 +286,8 @@ full file.
 | `docs/ARCHITECTURE.md` | Model architecture |
 | `docs/TRAINING.md` | Training procedure |
 | `docs/PART1_VERIFICATION.md` | Part 1 audit: verified numbers, data-file problems, capacity sweep |
-| `docs/PART2_RESULTS.md` | Part 2 results: benchmark table, diagnosis, ablations, next steps |
+| `docs/PART2_RESULTS.md` | Part 2 results: benchmark table, diagnosis, ablations |
+| `docs/PART3_RESULTS.md` | Part 3 results: jet features, WNAE, complexity matching, bump hunt, predictions |
 
 ## Citation
 
@@ -271,7 +296,7 @@ Cite the archived release:
 ```bibtex
 @misc{khan2026gae,
   author = {Khan, Jamil},
-  title  = {When Graph Autoencoders Look the Wrong Way: Complexity Bias and Simple Baselines in
+  title  = {When Graph Autoencoders Look the Wrong Way: Simple Baselines and Negative Results in
             Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset},
   year   = {2026},
   doi    = {10.5281/zenodo.23432779},
@@ -283,4 +308,21 @@ Cite the archived release:
 
 Most LHC searches look for a signal that a theory predicts. This project tests a different method:
 learn the background, and then look for events that do not agree with it. The Part 1 and Part 2 results
-show that this method needs strong baselines and controls for event complexity.
+show that this method needs strong baselines and checks for event complexity.
+
+## Project status
+
+The project is discontinued. No further work is planned.
+
+No method tested here is better than the label-free baseline mean pT per particle (AUC 0.811) under the
+pre-registered gate. The tested methods are:
+
+- graph autoencoders (node level and event level),
+- latent density scores (kNN and GMM),
+- density scores on jet features,
+- a WNAE on jet features,
+- training on a multiplicity-matched background.
+
+A weakly supervised bump hunt passes the gate only when it uses the known signal mass.
+
+The code and the results stay available. You can use them to reproduce all the numbers.

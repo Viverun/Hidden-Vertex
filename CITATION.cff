@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "When Graph Autoencoders Look the Wrong Way: Complexity Bias and Simple Baselines in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset"
+title: "When Graph Autoencoders Look the Wrong Way: Simple Baselines and Negative Results in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset"
 authors:
   - family-names: Khan
     given-names: Jamil
     email: khanjamilahmed202@gmail.com
     orcid: "https://orcid.org/0009-0007-1762-0416"
-version: 1.2.0
-date-released: 2026-10-17
+version: 2.0.0
+date-released: 2026-11-18
 license: MIT
 repository-code: "https://github.com/Viverun/Hidden-Vertex"

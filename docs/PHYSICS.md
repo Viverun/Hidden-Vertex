@@ -86,8 +86,10 @@ background events. The AUC is then below 0.5. Earlier work found the same effect
 - T. Finke et al., "Autoencoders for unsupervised anomaly detection in high energy physics", JHEP 06 (2021)
   161, arXiv:2104.09051.
 
-The Part 2 results of this project show the same effect for an event-level graph autoencoder. The scores have an
-AUC of 0.40 to 0.44. The simple variable HT/N gets 0.811 (see `PART2_RESULTS.md`).
+The Part 2 results of this project agree with this effect for an event-level graph autoencoder. The scores have an
+AUC of 0.40 to 0.44. The simple variable HT/N gets 0.811 (see `PART2_RESULTS.md`). Part 3 tested the cause.
+Retraining on a multiplicity-matched background does not recover performance. Thus, complexity is at most a
+partial explanation here (see `PART3_RESULTS.md`).
 
 Thus, an unsupervised score must be compared with simple baselines. Also, report the AUC in bins of
 multiplicity. Then the effect of the complexity is visible.

@@ -1,8 +1,9 @@
 {
-  "title": "When Graph Autoencoders Look the Wrong Way: Complexity Bias and Simple Baselines in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset (preprint and code)",
+  "title": "When Graph Autoencoders Look the Wrong Way: Simple Baselines and Negative Results in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset (preprint and code)",
   "upload_type": "publication",
   "publication_type": "preprint",
-  "description": "Preprint and full code. Graph autoencoders trained on background-only events of the LHC Olympics 2020 R&D dataset give inverted anomaly scores (AUC 0.40-0.44), while the label-free mean transverse momentum per particle (HT/N) reaches AUC 0.811. Correlation and within-bin analyses link the inversion of the latent-density scores to event complexity. The paper is in paper/main.pdf. Trained checkpoints and per-event test scores: https://huggingface.co/Viverun/lhco-rnd-event-gae.",
+  "description": "Preprint and full code. Graph autoencoders trained on background-only events of the LHC Olympics 2020 R&D dataset give inverted anomaly scores (AUC 0.40-0.44), while the label-free mean transverse momentum per particle (HT/N) reaches AUC 0.811. Follow-up studies: density scores on jet features (AUC 0.694-0.761), a Wasserstein-normalized autoencoder on jet features (0.637-0.721), complexity-matched evaluation and multiplicity-matched retraining (retrained scores 0.399-0.424), a reverse-direction diagnostic, and a CWoLa bump hunt with injected signal (0.716 at S/B = 0.001; it passes the pre-registered gate only with an oracle window at the known signal mass, 0.835). No method tested passes the pre-registered gate. Complexity (multiplicity and HT) is at most a partial explanation of the inversion. The project is discontinued; the code and results stay available for reproduction. The paper is in paper/main.pdf. Trained checkpoints and per-event test scores: https://huggingface.co/Viverun/lhco-rnd-event-gae.",
+  "version": "2.0.0",
   "creators": [
     {
       "name": "Khan, Jamil",
@@ -17,7 +18,8 @@
     "autoencoders",
     "LHC Olympics 2020",
     "high energy physics",
-    "machine learning"
+    "machine learning",
+    "negative result"
   ],
   "related_identifiers": [
     {
