@@ -23,12 +23,12 @@
 
 \begin{titlepage}
 \begin{flushright}
-\small Preprint, October 2026
+\small Preprint, v2, November 2026
 \end{flushright}
 \vspace*{1.5cm}
 \begin{center}
 {\LARGE\bfseries When Graph Autoencoders Look the Wrong Way:\\[0.4em]
-\Large Complexity Bias and Simple Baselines in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset\par}
+\Large Simple Baselines and Negative Results in Unsupervised Anomaly Detection on the LHC Olympics 2020 Dataset\par}
 \vspace{1.2cm}
 {\large Jamil Khan\footnote{\href{mailto:khanjamilahmed202@gmail.com}{khanjamilahmed202@gmail.com}}\par}
 \vspace{0.3cm}
@@ -49,10 +49,21 @@ $0.483\pm0.005$ with max-reduction and $0.781$ with mean-reduction; all three ev
 \emph{inverted}, with AUCs between $0.401$ and $0.436$, stable across seeds, nine ablations, and
 signal-contaminated training. By contrast, the mean transverse momentum per particle,
 $\ptmean=\HT/N$, reaches $0.811$, and $-\tauTO$ of the leading jet reaches $0.801$.
-Correlation and binned analyses indicate that the latent-density scores track event complexity: the
-signal has fewer, harder particles than QCD and is therefore placed in dense regions of the learned
-manifold. The benchmark code is public, and I suggest \ptmean as a standard reference baseline for
-unsupervised methods on this dataset.
+Correlation and binned analyses suggest that the latent-density scores track event complexity: the
+signal has fewer, harder particles than QCD. A follow-up with five studies does not support
+complexity as the main cause. Matching the multiplicity of the background to the signal raises the
+event-level AUCs only to $0.44$--$0.50$, and retraining on a multiplicity-matched background does not
+recover performance (AUC $0.40$--$0.42$, against a prediction fixed in advance of at least $0.47$).
+Density scores on jet-level features reach $0.69$--$0.76$, and a Wasserstein-normalized autoencoder
+(WNAE) on the same features reaches $0.72$ in a pilot and $0.64$ in a longer run; none passes the gate.
+The WNAE was run on jet features and not on the graph model, and its longer-run settings were fixed after the
+pilot test results had been seen. Complexity is at most a partial explanation. As a contrast, a
+weakly supervised CWoLa-style bump hunt asks whether an \mjj window holds an excess, and trains on a pool
+into which signal is injected, so it is not an unsupervised method. With the signal mass known, its
+oracle window passes the gate from a signal fraction of $0.001$ (AUC $0.835$). A version that does not use the mass
+(two grids of \mjj windows, fixed in advance) reaches only about $0.74$ and fails three of four
+predictions fixed in advance. The benchmark code is public,
+and I suggest \ptmean as a standard reference baseline for unsupervised methods on this dataset.
 \end{abstract}
 \end{center}
 \vfill
@@ -74,8 +85,10 @@ approaches~\cite{Farina:2018fyg,Heimel:2018mkt,Finke:2021sdf,Atkinson:2021nlt}.
 
 Autoencoder scores have a known weakness: they can end up measuring how complex an input is
 rather than how unusual it is. For jet images, simple signal jets turn out to be \emph{easier} to
-reconstruct than QCD jets~\cite{Finke:2021sdf}. This project started as an attempt to build a
-working graph-based detector, and ran into the same problem for particle graphs of whole events.
+reconstruct than QCD jets~\cite{Finke:2021sdf}, and likelihood-based generative models show related
+effects~\cite{Nalisnick:2018dgm,Serra:2019ocd}. This project started as an attempt to build a
+working graph-based detector. It produced inverted scores for particle graphs of whole events, and I first
+attributed this to complexity. A follow-up did not support that as the main explanation.
 This paper documents what happened:
 \begin{enumerate}
   \item a reproducible benchmark harness on the public LHCO R\&D data, with a frozen test set,
@@ -86,11 +99,19 @@ This paper documents what happened:
         (AUC $0.811$), above \HT, \mjj, and a node-level GAE;
   \item a negative result, under a decision rule fixed in advance, for an event-level GAE whose three anomaly scores are
         systematically inverted, with ablations, a contamination study, and a correlation-based
-        diagnosis that links the latent-density inversion to event complexity.
+        analysis that points to event complexity as a possible factor;
+  \item a follow-up (Part~3) that tests this: density scores and a Wasserstein-normalized
+        autoencoder~\cite{CMS:2025lmn} on jet features, complexity-matched evaluation and retraining, a
+        reverse-direction check, and a weakly supervised bump hunt as a contrast. None of the
+        unsupervised scores passes the gate, and matching the multiplicity does not recover
+        performance. The bump hunt passes only when the signal mass is used.
 \end{enumerate}
 None of this is a working anomaly detector. The practical point is simpler: before claiming that
 an unsupervised model has learned something on this dataset, compare it with \ptmean. If it cannot
-beat a ratio of two event totals, it has probably only learned the energy and multiplicity scale.
+beat a ratio of two event totals, it may have learned little beyond the energy and multiplicity scale.
+Part~3 shows that this reading needs care: the advantage of \ptmean largely disappears when
+the background is matched to the signal in multiplicity and \HT, but the learned scores do not
+become useful either.
 
 \section{Dataset and test protocol}
 \label{sec:data}
@@ -266,17 +287,18 @@ pure background (seed 0)       & 1 & 0.419 & 0.405 & 0.448 \\
 \end{tabular}
 \end{table}
 
-\section{Diagnosis}
+\section{Correlation analysis of the Part 2 scores}
 \label{sec:diagnosis}
 
 Table~\ref{tab:corr} gives Spearman correlations of the seed-0 scores with simple event
 quantities. The latent-density scores increase with multiplicity ($\rho=+0.28$ for $k$NN,
 $+0.23$ for GMM) and decrease with \ptmean ($-0.27$, $-0.20$), also within background alone. Their
 AUC within multiplicity bins is close to chance ($k$NN $0.43$--$0.50$, GMM $0.47$--$0.51$).
-Since signal events have fewer and harder particles than QCD background, they fall into dense
-regions of a latent space trained on QCD. Under the pre-declared sign (far from training data
-means anomalous), this produces AUCs below $0.5$. This explanation is supported by correlations
-but was not tested causally.
+One reading is that signal events have fewer and harder particles than QCD background and so fall
+into dense regions of a latent space trained on QCD. Under the pre-declared sign (far from training data
+means anomalous), this would produce AUCs below $0.5$. The correlations are consistent with this
+reading, but they do not test it. Section~\ref{sec:part3} tests it directly, and the result is that
+complexity is at most a partial explanation.
 
 The Chamfer score behaves differently: it barely tracks multiplicity ($\rho=+0.08$) or \ptmean
 ($\rho=-0.07$), and remains inverted within multiplicity bins ($0.41$--$0.48$) and within \HT
@@ -303,20 +325,430 @@ GMM     & $+0.02$ / $+0.18$ / $0.00$ & $+0.23$ / $+0.27$ / $+0.15$ & $+0.01$ / $
 \end{tabular}
 \end{table}
 
+\section{Part 3: follow-up tests}
+\label{sec:part3}
+
+The explanation in Section~\ref{sec:diagnosis} rests on correlations. Part~3 asks whether it
+survives a direct test, and whether other inputs or a different training objective change the
+outcome. It has five studies: (A) density and autoencoder scores on jet-level features;
+(B) a Wasserstein-normalized autoencoder (WNAE) on the same features; (C) complexity-matched
+evaluation and retraining; (D) a reverse-direction check; and (E) a weakly supervised
+CWoLa-style bump hunt, as a contrast to the outlier scores of (A)--(D). The test set, the gate, the score
+sign (larger = more anomalous) and the training and validation splits are the same as in
+Parts~1 and~2. No model, epoch or score sign was chosen from test AUC. One setting was fixed
+after test results had been seen; Section~\ref{sec:disclosures} states it.
+
+\subsection{Related work}
+\label{sec:related}
+
+Likelihood-based generative models are known to assign high likelihood to inputs from other
+distributions~\cite{Nalisnick:2018dgm}, and Serr\`a et al.\ link the effect to input complexity~\cite{Serra:2019ocd}.
+The complexity effect for autoencoders in this paper looks similar, but I did not test the link.
+Normalized autoencoders (NAEs) address a related weakness of plain autoencoders: they can
+reconstruct inputs far from the training data well. An NAE adds a normalization constraint and
+trains with negative samples drawn from the model's own energy~\cite{Yoon:2021nae}; it was
+applied to LHC jets by Dillon et al.~\cite{Dillon:2022mkq}. The WNAE of the CMS
+Collaboration~\cite{CMS:2025lmn} replaces the NAE objective with a Wasserstein distance between
+data and negative samples. Other work discusses topological obstructions to autoencoding~\cite{Batson:2021agz},
+bump hunting with a variational autoencoder that has physical observables in its latent space~\cite{Bortolato:2021zic}, and a graph autoencoder
+for anomaly detection at the LHC~\cite{Araz:2025oax}. The Part~3 results do not test any of these claims in their own
+setting. They test one WNAE-style objective on one signal model.
+
+\subsection{Methods}
+\label{sec:part3methods}
+
+\paragraph{Jet-feature scores (A).}
+The inputs are the jet masses $m_{j1}$ and $m_{j2}$, the ratios $\tau_{21}$ of the two leading
+jets, and \mjj (``jet5''); ``jet4'' is the same set without \mjj. Features are mapped to a
+standard normal with a quantile transform fitted on the $180{,}000$ training events. Three scores are
+fitted on background only: the mean distance to the 20 nearest training events ($k$NN), the negative
+log-likelihood under an 8-component full-covariance Gaussian mixture (GMM), and the reconstruction error
+of an MLP autoencoder (5--32--32--3--32--32--5 with GELU, AdamW, 30 epochs, early-stopping
+patience 5). Three seeds are used. The $k$NN score does not depend on the seed.
+
+\paragraph{WNAE (B).}
+I re-implemented the WNAE following the public reference code of the CMS authors. It was run on
+the jet5 features, \emph{not} on the graph model, because it needs a fixed-size input vector. The
+network is the MLP autoencoder above, and its energy is the reconstruction MSE. Negative samples
+come from 10 steps of Langevin MCMC (step size $0.0242$, noise $0.22$, temperature $0.063$) with a
+persistent buffer of $10{,}000$ samples, $5\%$ restarts from a standard normal, and samples
+clipped to $[-3,3]$. The loss is the exact Wasserstein-1 distance between a batch of data and a batch of
+negatives (network simplex, POT library). Adam is used with learning rate $2\times10^{-4}$. The
+saved model is the epoch with the lowest validation Wasserstein distance, which does not use signal
+labels. The ground cost, optimiser and learning-rate schedule differ from the reference code, and
+the inputs and the data are not those of the CMS study. Two runs are reported. The \emph{pilot} uses
+batch size $4096$ and $6$ epochs, fixed from a timing run before any test AUC was computed. The
+\emph{long} run uses batch size $1024$ and up to $150$ epochs, with early stopping when the
+validation distance had not improved by $0.1\%$ in $30$ epochs. The long-run settings were fixed
+\emph{after} the pilot test AUCs had been seen (Section~\ref{sec:disclosures}).
+
+\paragraph{Complexity matching (C).}
+Two kinds of matching use the signal's multiplicity and \HT distributions. This uses signal
+information, so both are diagnostics and not detectors.
+\emph{Matched evaluation}: background test events are weighted so that their distribution
+over bins of multiplicity (20 quantile bins), or over $8\times8$ bins of multiplicity and \HT,
+equals the signal's. Weights are clipped at the 99th percentile. The 95\% bootstrap intervals
+recompute the weights in every resample.
+\emph{Matched retraining}: the Part~2 event-level model is trained again on a background sample
+drawn with replacement from the training events with weights that make the multiplicity
+distribution follow that of $16{,}200$ signal events outside the test set ($30$ quantile bins,
+weights clipped at the $99.5$th percentile). The validation set is not reweighted.
+The expected outcome was fixed before any result: if multiplicity were the cause of the inversion,
+the retrained scores would reach an AUC of at least $0.47$. For matched evaluation I fixed that if
+complexity alone explained the $k$NN and GMM inversion, their matched AUC would lie within
+$0.5\pm0.03$.
+
+\paragraph{Reverse direction (D).}
+As a diagnostic that uses signal labels, the $k$NN, GMM and MLP-autoencoder scores are fitted on
+$76{,}000$ \emph{signal} events (autoencoder validation: $9{,}000$ more), and the frozen test set is
+scored with the background as the ``anomalous'' class. The quantile transform is refitted on the
+signal set. This is not an anomaly-detection result.
+
+\subsection{Results}
+\label{sec:part3results}
+
+\paragraph{Jet-feature scores.}
+Table~\ref{tab:jet} lists the seed-averaged results. With \mjj included, the density scores reach
+$0.717$ ($k$NN) and $0.694$ (GMM); without \mjj they reach $0.761$ and $0.753$. The density scores are
+better than the Part~2 scores, but all are below the bar of $0.811$ and below the best single jet observable
+$-\tauTO$ ($0.801$). The MLP autoencoder is close to chance on both feature sets ($0.505$ and
+$0.539$). Removing \mjj raises the AUC of the density scores. It also raises their minimum within-bin AUC from
+$0.55$--$0.57$ to $0.67$--$0.68$, so the jet4 density scores meet the within-bin requirement of $0.6$.
+No jet-feature score exceeds the bar, so \textbf{the gate is not passed}. The maximum
+significance improvement (TPR$/\sqrt{\mathrm{FPR}}$ at FPR $\geq10^{-3}$) of the density scores is $1.1$--$1.3$,
+against $2.28$ for the oracle mass window.
+
+\begin{table}[t]
+\centering
+\caption{Jet-feature scores (seed-averaged over three seeds, 98.3\% bootstrap intervals), with
+the minimum AUC within bins of \HT, $N$ and leading \pt. The jet5 rows are the pre-declared headline
+rows. jet4 is a variant without \mjj. The bar is $0.811$.}
+\label{tab:jet}
+\begin{tabular}{llccc}
+\toprule
+Score & Features & AUC & 98.3\% CI & min.\ within-bin \\
+\midrule
+$k$NN distance       & jet4 & 0.761 & 0.751--0.774 & 0.678 \\
+GMM likelihood       & jet4 & 0.753 & 0.742--0.765 & 0.670 \\
+MLP autoencoder      & jet4 & 0.539 & 0.530--0.548 & 0.486 \\
+\midrule
+$k$NN distance       & jet5 & 0.717 & 0.705--0.729 & 0.569 \\
+GMM likelihood       & jet5 & 0.694 & 0.683--0.708 & 0.546 \\
+MLP autoencoder      & jet5 & 0.505 & 0.495--0.516 & 0.443 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{WNAE.}
+Table~\ref{tab:wnae} reports both runs. The pilot has a mean AUC of $0.721$ (seeds $0.660$,
+$0.757$, $0.747$); the long run has $0.637$ (seeds $0.682$, $0.611$, $0.616$). The pilot
+trained to its last epoch with the validation distance still falling, which is why the long run was
+made. In the long run the validation distance reached $0.75$--$0.79$ and the test AUC was lower, not
+higher. The two runs use different batch sizes, so their distances are not strictly comparable, but
+in this case a better value of the model-selection criterion did not come with a better detector.
+Neither run passes the gate: the upper ends of the intervals ($0.730$ and $0.647$) are below $0.811$,
+and the long run has a minimum within-bin AUC of $0.496$. The pilot WNAE ($0.721$) is not better than the
+$k$NN score on the same features ($0.717$) beyond the seed spread, and it is below the $k$NN and
+GMM scores without \mjj. I report both runs and select neither. Because the three seeds disagree by up to
+$0.1$ in AUC, I would not rank the two settings from this evidence.
+
+\begin{table}[t]
+\centering
+\caption{WNAE on jet5, three seeds, 95\% bootstrap intervals on the seed-averaged score.
+Both runs are shown; neither is selected. Validation distances for the two batch sizes are not
+strictly comparable.}
+\label{tab:wnae}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+Run & batch & max epochs & AUC (mean) & 95\% CI & min.\ within-bin & seeds 0 / 1 / 2 & best epoch \\
+\midrule
+Pilot & 4096 & 6   & 0.721 & 0.713--0.730 & 0.582 & 0.660 / 0.757 / 0.747 & 6 / 6 / 6 \\
+Long  & 1024 & 150 & 0.637 & 0.627--0.647 & 0.496 & 0.682 / 0.611 / 0.616 & 141 / 39 / 92 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Matched evaluation of the Part~2 scores.}
+Table~\ref{tab:matchp2} (upper block) shows the effect on the Part~2 scores. Matching the multiplicity
+raises the $k$NN AUC from $0.401$ to $0.461$ and the Chamfer AUC from $0.428$ to $0.457$; the GMM
+AUC reaches $0.495$. Matching \HT as well gives $0.438$, $0.448$ and $0.470$. Part of the
+inversion therefore disappears when the multiplicity is matched. The scores do not become
+informative: by the criterion fixed in advance, the $k$NN AUC stays below $0.47$ in both matchings and
+the GMM AUC stays below $0.47$ in the two-dimensional matching ($0.4695$). The (multiplicity, \HT) matching has a
+background effective sample size of only about $830$ out of $5{,}000$, with $4.2\%$ of
+background events at weight zero, so the intervals in this block are wide in practice and the numbers
+for that matching should be read with care.
+
+\paragraph{Retraining on a multiplicity-matched background.}
+Training the event-level model on the matched sample did not help (Table~\ref{tab:matchp2}, lower block).
+The AUCs on the plain test set are $0.415$ (Chamfer), $0.399$ ($k$NN) and $0.424$ (GMM),
+against $0.428$, $0.401$ and $0.436$ without matching. The prediction fixed in advance (AUC of at
+least $0.47$) failed for all three scores. Under matched evaluation the retrained scores are at
+$0.47$--$0.50$ (multiplicity) and $0.45$--$0.48$ (multiplicity and \HT), close to the original
+models. The retraining is limited: the drawn sample of $180{,}000$ events had only about $92{,}900$ unique events,
+so about $48\%$ of the events were duplicates (effective sample size from the weights alone: about
+$1.1\times10^{5}$), and it matched the multiplicity only, not \HT.
+
+\begin{table}[t]
+\centering
+\caption{Part~2 scores on the frozen test set: plain AUC, background reweighted to the signal's
+multiplicity distribution (20 bins), and to its (multiplicity, \HT) distribution ($8\times8$ bins).
+Three seeds, 95\% percentile-bootstrap intervals with weights recomputed in every resample. Lower
+block: the same model trained on a background sample matched in multiplicity only (about 48\% duplicate events).}
+\label{tab:matchp2}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccc}
+\toprule
+Training set & Score & plain & mult.-matched & mult.+\HT-matched \\
+\midrule
+original & Chamfer & 0.428 [0.418, 0.439] & 0.457 [0.445, 0.470] & 0.438 [0.415, 0.459] \\
+         & $k$NN   & 0.401 [0.391, 0.410] & 0.461 [0.450, 0.472] & 0.448 [0.430, 0.463] \\
+         & GMM     & 0.436 [0.427, 0.445] & 0.495 [0.484, 0.506] & 0.470 [0.451, 0.485] \\
+\midrule
+mult.-matched & Chamfer & 0.415 [0.405, 0.427] & 0.472 [0.458, 0.485] & 0.448 [0.424, 0.470] \\
+              & $k$NN   & 0.399 [0.389, 0.408] & 0.482 [0.471, 0.495] & 0.467 [0.447, 0.483] \\
+              & GMM     & 0.424 [0.415, 0.433] & 0.503 [0.491, 0.515] & 0.480 [0.461, 0.498] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{All scores under complexity matching.}
+Table~\ref{tab:matchcmp} puts every score on the same footing. The mean transverse momentum per
+particle, the best baseline of Table~\ref{tab:baselines}, falls from $0.811$ to $0.670$ with
+multiplicity matching and to $0.509$ with (multiplicity, \HT) matching. \HT and \mjj fall to $0.510$
+and $0.540$ with the two-dimensional matching, and the Part~1 mean-reduction autoencoder falls from
+$0.781$ to $0.570$. In contrast, $-\tauTO$ stays at $0.805$, the $k$NN and GMM scores on jet4 fall only to
+$0.729$ and $0.718$, and the pilot WNAE falls only to $0.680$. The headline advantage of \ptmean over the
+learned scores is therefore largely a complexity effect, and the jet-feature scores carry some
+information beyond multiplicity and \HT. None of the learned scores approaches the single
+observable $-\tauTO$ or the oracle mass window ($0.817$), and the Part~2 scores remain at $0.44$--$0.47$.
+These matched AUCs are \emph{point estimates only}. Because of the small effective sample size, I
+do not give intervals for this table. The matching is a diagnostic and not a new gate.
+
+\begin{table}[t]
+\centering
+\caption{ROC AUC of all scores on the frozen test set, plain and with the background reweighted to the signal's
+multiplicity distribution or to its (multiplicity, \HT) distribution. Point estimates without confidence
+intervals (background effective sample size about $830$ for the last column). Model rows are
+seed-averaged. The oracle row uses the signal mass. Matched columns use signal information and are
+diagnostics.}
+\label{tab:matchcmp}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Score & plain & mult.-matched & mult.+\HT-matched \\
+\midrule
+$-|\mjj-3500\,\mathrm{GeV}|$ (oracle) & 0.900 & 0.899 & 0.817 \\
+$-\tauTO$ (leading jet)               & 0.801 & 0.812 & 0.805 \\
+$k$NN, jet4                           & 0.761 & 0.754 & 0.729 \\
+GMM, jet4                             & 0.753 & 0.744 & 0.718 \\
+WNAE pilot, jet5                      & 0.721 & 0.723 & 0.680 \\
+$k$NN, jet5                           & 0.717 & 0.710 & 0.651 \\
+GMM, jet5                             & 0.694 & 0.689 & 0.630 \\
+WNAE long, jet5                       & 0.637 & 0.631 & 0.571 \\
+Node-level GAE (mean)                 & 0.781 & 0.670 & 0.570 \\
+MLP autoencoder, jet4 / jet5          & 0.539 / 0.505 & 0.534 / 0.508 & 0.526 / 0.491 \\
+\mjj                                  & 0.788 & 0.776 & 0.540 \\
+\ptmean                               & 0.811 & 0.670 & 0.509 \\
+\HT                                   & 0.792 & 0.833 & 0.510 \\
+$-N$                                  & 0.715 & 0.499 & 0.514 \\
+Event-level GAE: Chamfer              & 0.428 & 0.457 & 0.438 \\
+Event-level GAE: $k$NN                & 0.401 & 0.461 & 0.448 \\
+Event-level GAE: GMM                  & 0.436 & 0.495 & 0.470 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reverse direction.}
+Table~\ref{tab:reverse} gives the result of training on signal and detecting background. Every score
+does better than in the forward direction. The change is very large for the jet5 scores
+($0.717\to0.905$ for $k$NN, $0.694\to0.903$ for GMM, $0.505\to0.845$ for the autoencoder) and small
+for the jet4 density scores ($0.761\to0.791$ and $0.753\to0.810$). The asymmetry appears when \mjj is
+included, which is consistent with a narrow signal peak in \mjj: a model fitted to the narrow signal
+distribution flags the broad background as unusual, while a model fitted to the broad background
+does not flag the signal peak as strongly. This is a statement about these features and this signal
+model. It also shows that the jet features carry the information; the forward weakness is not a
+lack of input information.
+
+\begin{table}[t]
+\centering
+\caption{Reverse-direction diagnostic (uses signal labels; not an anomaly-detection result). Forward:
+trained on background, signal is positive. Reverse: trained on signal, background is positive;
+95\% bootstrap intervals.}
+\label{tab:reverse}
+\begin{tabular}{llccc}
+\toprule
+Score & Features & forward AUC & reverse AUC & reverse 95\% CI \\
+\midrule
+$k$NN distance  & jet5 & 0.717 & 0.905 & 0.900--0.911 \\
+GMM likelihood  & jet5 & 0.694 & 0.903 & 0.898--0.909 \\
+MLP autoencoder & jet5 & 0.505 & 0.845 & 0.838--0.851 \\
+$k$NN distance  & jet4 & 0.761 & 0.791 & 0.782--0.799 \\
+GMM likelihood  & jet4 & 0.753 & 0.810 & 0.802--0.818 \\
+MLP autoencoder & jet4 & 0.539 & 0.635 & 0.627--0.644 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Weak-supervision contrast: a CWoLa-style bump hunt}
+\label{sec:cwola}
+
+The scores above ask whether an event is rare under the background. A bump hunt asks a different
+question: is there an excess of events in some \mjj window? This study is a contrast and is
+\emph{not} an unsupervised method trained on pure background. Signal is injected into the unlabeled
+training pool, so the setting is weakly supervised, and it assumes that the new physics appears as a
+resonance in \mjj. I use the idea of classification without labels (CWoLa)~\cite{Metodiev:2017vrx,Collins:2018epr}:
+a classifier trained to separate events in a signal region (SR) of \mjj from events in neighbouring
+sidebands (SB) learns the features in which the two regions differ, and an excess of signal in the SR
+makes those features useful for finding the signal. The protocol was fixed on 14 November 2026, before any score
+was computed on the test set (\texttt{configs/part3\_cwola.yaml}), and test AUC selects nothing.
+
+\paragraph{Method.}
+The unlabeled pool holds the $955{,}000$ background rows outside the frozen test set (rows $\geq45{,}000$)
+plus injected signal events from rows $\geq1{,}005{,}000$, which are never in the test set. The
+signal-to-background ratio $S/B$ in the pool is $0$, $0.0005$, $0.001$, $0.002$, $0.005$ or $0.01$
+(for $0.001$: $955$ signal events). Three seeds choose the injected events and all splits.
+The pool is split $70\%/30\%$. The first part trains the classifiers; the second is a reference sample
+that only supplies the score distribution of each window. The classifiers are boosted trees
+(scikit-learn \texttt{HistGradientBoostingClassifier}, 200 iterations at most, early stopping,
+balanced class weights), as an ensemble of 10 models, and they use the jet4 features ($m_{j1}$, $m_{j2}$ and
+$\tau_{21}$ of both jets). \mjj is \emph{not} an input; it only defines the windows.
+Two grids of windows of width $0.4$~TeV, offset by half a window, cover $2.0$--$5.2$~TeV (grid A) and
+$2.2$--$5.4$~TeV (grid B). The edges are round numbers and are not centred on the signal mass of $3.5$~TeV.
+Each SR has a sideband of $0.2$~TeV on each side, and the outer windows are open-ended with one sideband of
+$0.4$~TeV. A test event is assigned to the window of each grid that holds its \mjj. Its score is the fraction of
+reference-sample SR events of that window with a lower ensemble output (a quantile), averaged over the two
+grids. A larger value means more anomalous. No window needed merging in any run.
+The test set, the gate and the bar of $0.811$ are those of the other studies, and the gate is judged at
+$S/B=0.001$, the level of the LHCO benchmark. Confidence intervals are 95\% percentile bootstraps
+of the seed-mean AUC.
+
+\paragraph{Oracle window.}
+For reference only, the same classifier and features are trained for one window that uses the known signal mass:
+SR $3.3$--$3.7$~TeV with sidebands $3.1$--$3.3$ and $3.7$--$3.9$~TeV. Its score is the raw ensemble output
+for every test event. This window needs knowledge of the signal and is not a model-independent result.
+
+\paragraph{Results.}
+Table~\ref{tab:cwola} gives the AUCs. Without injected signal the score is at $0.532$, and the
+AUC of the window-agnostic score rises to $0.716$ at $S/B=0.001$ and then stays at $0.735$--$0.741$ from
+$S/B=0.002$ upward. At $S/B=0.001$ the lower bound of the interval is $0.707$, so the gate is not passed.
+The minimum within-bin AUC is $0.628$ there and does not stop it; the AUC is the limit. The oracle window
+reaches $0.835$ at $S/B=0.001$ (interval $0.828$--$0.842$, minimum within-bin AUC $0.733$) and rises to $0.928$
+at $S/B=0.01$. It passes the gate from $S/B=0.001$ upward. These gate decisions for the oracle are for
+information only, because the oracle uses the signal mass.
+
+\begin{table}[t]
+\centering
+\caption{CWoLa-style bump hunt on the frozen test set: seed-averaged AUC over three seeds, 95\% bootstrap
+intervals of the seed-mean, and the minimum AUC within bins of \HT, $N$ and leading \pt. ``Window-agnostic'' is the
+pre-registered score (two grids of \mjj windows, no use of the signal mass). ``Oracle window'' uses the known signal mass
+(SR $3.3$--$3.7$~TeV) and is for reference only. The bar is $0.811$ and the gate is judged at $S/B=0.001$.}
+\label{tab:cwola}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{4}{c}{Window-agnostic (pre-registered)} & \multicolumn{4}{c}{Oracle window (uses signal mass)} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+$S/B$ & AUC & 95\% CI & min.\ w.-bin & gate & AUC & 95\% CI & min.\ w.-bin & gate \\
+\midrule
+0      & 0.532 & 0.522--0.542 & 0.461 & no  & 0.478 & 0.469--0.486 & 0.437 & no  \\
+0.0005 & 0.666 & 0.657--0.675 & 0.605 & no  & 0.681 & 0.673--0.689 & 0.602 & no  \\
+0.001  & 0.716 & 0.707--0.725 & 0.628 & no  & 0.835 & 0.828--0.842 & 0.733 & yes \\
+0.002  & 0.741 & 0.732--0.750 & 0.655 & no  & 0.887 & 0.881--0.894 & 0.760 & yes \\
+0.005  & 0.735 & 0.725--0.744 & 0.645 & no  & 0.912 & 0.906--0.917 & 0.796 & yes \\
+0.01   & 0.739 & 0.729--0.749 & 0.652 & no  & 0.928 & 0.923--0.933 & 0.817 & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Predictions fixed in advance.}
+Four predictions were fixed before any test score was computed. \emph{Three failed and one passed.}
+(1)~At $S/B=0$ the seed-mean AUC should lie in $[0.47,0.53]$: it is $0.532$, just outside, so this
+\textbf{failed}. The two grids differ ($0.555$ for grid A, $0.492$ for grid B), and I did not establish
+the cause. (2)~The seed-mean AUC should not decrease as $S/B$ grows (tolerance $0.01$): the largest
+decrease is $0.006$ (from $0.002$ to $0.005$), so this \textbf{passed}. (3)~At $S/B=0.001$ the gate should be passed:
+the lower bound is $0.707$, so this \textbf{failed}. (4)~At $S/B\geq0.005$ the AUC should be above $0.90$:
+it is $0.735$ and $0.739$, so this \textbf{failed}.
+
+\paragraph{Possible explanation of the plateau (hypothesis, not tested here).}
+The window-agnostic score stops improving near $0.74$ while the oracle window keeps improving. One possible
+cause is that the signal peak lies near a window edge. Signal events that are close to the peak but fall
+in a neighbouring window put signal into the sidebands of the window that holds the peak, and
+the classifier of that window is then pushed to score signal low. The pool counts support only that
+the signal is present in both grids near $3.5$~TeV; I did not test the explanation, for example by
+shifting the grids or by removing the signal from the sidebands. I did \emph{not} change the window design
+after seeing these results. A better mass-agnostic design is left to future work.
+
+\paragraph{Interpretation.}
+These numbers show that an excess-based method with the signal mass known clears the bar of $0.811$ at the
+benchmark signal fraction, while the outlier scores of this paper did not. They do not show that a
+bump hunt in general beats outlier scores: the mass-agnostic version tested here, with one window design
+and one signal model, did not clear the bar, and the result for the oracle window depends on the
+signal mass and on the injected signal. The two settings also differ in what they assume (a resonance in \mjj,
+and signal in the training pool), so the AUCs are not a like-for-like comparison.
+
+\subsection{What was and was not done}
+\label{sec:disclosures}
+
+\begin{itemize}
+  \item \textbf{WNAE settings fixed after seeing test AUC.} The pilot settings were fixed before
+        test AUCs were computed. The long-run settings (batch size $1024$, up to $150$ epochs, early-stopping
+        patience $30$) were fixed \emph{after} the pilot test AUCs had been seen. The stated reasons are
+        convergence (the pilot's best epoch was its last) and compute cost, but I cannot exclude that
+        the pilot result influenced the choice. Both runs are reported, and neither is selected.
+  \item \textbf{WNAE was run on jet features, not on the graph model.} It needs a fixed-size input.
+        Its result says nothing about a WNAE of the particle graph, and it is a re-implementation, not the
+        CMS code or configuration.
+  \item \textbf{No intervals for the complexity-matched comparison.} The (multiplicity, \HT)
+        matching leaves a background effective sample size of about $830$. Table~\ref{tab:matchcmp}
+        gives point estimates only.
+  \item \textbf{The multiplicity-matched retraining set had about $48\%$ duplicate events} (about
+        $92{,}900$ unique events in $180{,}000$ draws) and matched multiplicity only, not \HT.
+  \item \textbf{Matching and the reverse check use signal information.} They are diagnostics.
+  \item \textbf{Seeds.} Three seeds per model. The pilot WNAE seeds differ by up to $0.1$ in AUC.
+  \item \textbf{The bump hunt uses injected signal in training.} Signal events are added to the unlabeled
+        pool (Section~\ref{sec:cwola}), so it is a weakly supervised setting and not an unsupervised one. It
+        also assumes a resonance in \mjj.
+  \item \textbf{The oracle window uses the known signal mass.} It is shown for reference only, and its gate
+        decisions are not a model-independent result.
+  \item \textbf{The zero-injection AUC of $0.532$ is slightly above chance, and its cause is not established.}
+        It lies just outside the interval fixed in advance, $[0.47,0.53]$, and the two window grids
+        differ ($0.555$ and $0.492$).
+  \item \textbf{The plateau explanation of the bump hunt is a hypothesis.} It was not tested, and the window design
+        was not changed after the results were seen.
+\end{itemize}
+
 \section{Discussion and outlook}
 \label{sec:discussion}
 
-These results add to the evidence that autoencoder-based anomaly scores are vulnerable to
-complexity bias~\cite{Finke:2021sdf}, and extend it to particle-graph representations of
-full events. Two practical lessons follow. First, unsupervised methods on the LHCO R\&D data
+These results are consistent with earlier reports that autoencoder-based anomaly scores can
+depend on input complexity~\cite{Finke:2021sdf}, but they do not show that complexity is the cause of the
+failures here. Matching the multiplicity moves the event-level scores closer to $0.5$
+(for example $k$NN from $0.401$ to $0.461$), yet retraining on a multiplicity-matched background
+leaves the AUCs at $0.40$--$0.42$, and no matched score is informative. Complexity is at most a
+partial explanation. The remaining deficit is not explained: candidates I have not tested include the
+choice of input representation, the pooling and latent space of the graph encoder, and the
+topological limits of a low-dimensional latent~\cite{Batson:2021agz}. The
+normalized-autoencoder approach was designed against autoencoders that reconstruct unfamiliar inputs
+well~\cite{Yoon:2021nae,Dillon:2022mkq,CMS:2025lmn}. In this work it did not pass the gate on jet
+features (AUC $0.64$--$0.72$), and it was not tried on the graph model, so its fit to this problem
+is open. Two practical lessons follow. First, unsupervised methods on the LHCO R\&D data
 should be compared not only with \HT but with \ptmean, which already reaches AUC $0.81$ without
 any training. Second, within-bin AUCs at fixed multiplicity and \HT are a cheap and informative
 diagnostic: a score that loses its discrimination at fixed complexity has not learned
-substructure.
+substructure. A matched evaluation, as in Section~\ref{sec:part3}, is a third check. In that test the
+advantage of \ptmean over the jet-feature scores vanishes, while $-\tauTO$ keeps its AUC of $0.805$.
+The bump hunt of Section~\ref{sec:cwola} gives a different contrast. With the signal mass known, an
+excess-based score clears the bar that the outlier scores failed (AUC $0.835$ at $S/B=0.001$), but the
+version without the mass did not (AUC $0.716$, and about $0.74$ at larger $S/B$), and it needs signal in the training pool. A
+better mass-agnostic window design is left to future work.
 
 The features that distinguish the signal in this dataset are jet-level: two-prong
 substructure (\tauTO), jet masses and \mjj. These are not available to the encoder as explicit
-inputs. Natural next steps are therefore (i) adding jet-level and substructure inputs,
+inputs. Giving them to density models and to a WNAE (Part~3) helped
+($0.69$--$0.76$ against $0.40$--$0.44$), but did not pass the gate. Natural next steps are therefore (i) a graph-level
+WNAE or other normalized autoencoder trained with jet-level and substructure inputs,
 (ii) conditioning the model on, or regressing out, multiplicity and \ptmean so that the score
 measures structure at fixed complexity, and (iii) choosing the score sign on background-only or
 simulated data. Large foundation models for collider physics trained on simulated events are
@@ -325,14 +757,21 @@ whether their anomaly scores capture more than event complexity.
 
 \paragraph{Limitations.}
 All results use a single signal model and the R\&D dataset, not the LHCO black boxes. The
-event-level model was evaluated in one configuration fixed in advance with limited ablations,
-and the complexity explanation is correlational. Ablation and contamination runs use two or
-one seeds, so differences below $\sim0.02$ should not be interpreted.
+event-level model was evaluated in one configuration fixed in advance with limited ablations.
+The complexity explanation is correlational, and the Part~3 tests did not support it as the main
+cause; they cannot rule out a smaller contribution. Ablation and contamination runs use two or
+one seeds, so differences below $\sim0.02$ should not be interpreted. The WNAE is my
+re-implementation on five jet features, with a pilot and a longer run that disagree
+(Section~\ref{sec:disclosures}); it is not a test of the CMS method. The complexity-matched
+comparison has no confidence intervals because of a small effective sample size, and the
+multiplicity-matched retraining set contained about $48\%$ duplicate events. The bump hunt uses one
+window design, injected signal and a single signal model, and its oracle window uses the signal mass.
 
 \section*{Code availability}
 All code, configurations, and the benchmark harness are available at the public repository
 \url{https://github.com/Viverun/Hidden-Vertex}, under the MIT licence. The detailed result
-reports are in \texttt{docs/PART1\_VERIFICATION.md} and \texttt{docs/PART2\_RESULTS.md}.
+reports are in \texttt{docs/PART1\_VERIFICATION.md} and \texttt{docs/PART2\_RESULTS.md}. The Part~3
+reports are in \texttt{results/part3/} and \texttt{results/part2/part3c\_multmatch.md}.
 The trained Part~2 checkpoints (three seeds), their training-set latents, and the per-event
 test-set scores with HDF5 row indices are available at
 \url{https://huggingface.co/Viverun/lhco-rnd-event-gae}.

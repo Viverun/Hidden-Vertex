@@ -1,4 +1,4 @@
-\begin{thebibliography}{12}
+\begin{thebibliography}{22}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -41,6 +41,29 @@ Oliver Atkinson, Akanksha Bhardwaj, Christoph Englert, Vishal~S. Ngairangbam,
 \newblock {Anomaly detection with convolutional graph neural networks}.
 \newblock \emph{JHEP}, 08:\penalty0 080, 2021.
 \newblock \doi{10.1007/JHEP08(2021)080}.
+
+\bibitem[Nalisnick et~al.(2019)Nalisnick, Matsukawa, Teh, Gorur, and
+  Lakshminarayanan]{Nalisnick:2018dgm}
+Eric Nalisnick, Akihiro Matsukawa, Yee~Whye Teh, Dilan Gorur, and Balaji
+  Lakshminarayanan.
+\newblock {Do deep generative models know what they don't know?}
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2019.
+
+\bibitem[Serr{\`a} et~al.(2020)Serr{\`a}, {\'A}lvarez, G{\'o}mez, Slizovskaia,
+  N{\'u}{\~n}ez, and Luque]{Serra:2019ocd}
+Joan Serr{\`a}, David {\'A}lvarez, Vicen{\c{c}} G{\'o}mez, Olga Slizovskaia,
+  Jos{\'e}~F. N{\'u}{\~n}ez, and Jordi Luque.
+\newblock {Input complexity and out-of-distribution detection with
+  likelihood-based generative models}.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2020.
+
+\bibitem[{CMS Collaboration}(2026)]{CMS:2025lmn}
+{CMS Collaboration}.
+\newblock {Wasserstein normalized autoencoder for anomaly detection}.
+\newblock \emph{Mach. Learn.: Sci. Technol.}, 7:\penalty0 035030, 2026.
+\newblock \doi{10.1088/2632-2153/ae6168}.
 
 \bibitem[Kasieczka et~al.(2019)Kasieczka, Nachman, and Shih]{LHCO:zenodo}
 Gregor Kasieczka, Benjamin Nachman, and David Shih.
@@ -85,5 +108,52 @@ Haoqiang Fan, Hao Su, and Leonidas Guibas.
   single image}.
 \newblock In \emph{IEEE Conference on Computer Vision and Pattern Recognition
   (CVPR)}, pages 605--613, 2017.
+
+\bibitem[Yoon et~al.(2021)Yoon, Noh, and Park]{Yoon:2021nae}
+Sangwoong Yoon, Yung-Kyun Noh, and Frank~Chongwoo Park.
+\newblock {Autoencoding under normalization constraints}.
+\newblock In \emph{Proceedings of the 38th International Conference on Machine
+  Learning (ICML)}, volume 139 of \emph{PMLR}, pages 12087--12097, 2021.
+
+\bibitem[Dillon et~al.(2023)Dillon, Favaro, Plehn, Sorrenson, and
+  Kr{\"a}mer]{Dillon:2022mkq}
+Barry~M. Dillon, Luigi Favaro, Tilman Plehn, Peter Sorrenson, and Michael
+  Kr{\"a}mer.
+\newblock {A normalized autoencoder for LHC triggers}.
+\newblock \emph{SciPost Phys. Core}, 6:\penalty0 074, 2023.
+\newblock \doi{10.21468/SciPostPhysCore.6.4.074}.
+
+\bibitem[Batson et~al.(2021)Batson, Haaf, Kahn, and Roberts]{Batson:2021agz}
+Joshua Batson, C.~Grace Haaf, Yonatan Kahn, and Daniel~A. Roberts.
+\newblock {Topological obstructions to autoencoding}.
+\newblock \emph{JHEP}, 04:\penalty0 280, 2021.
+\newblock \doi{10.1007/JHEP04(2021)280}.
+
+\bibitem[Bortolato et~al.(2022)Bortolato, Dillon, Kamenik, and Smolkovi{\v
+  c}]{Bortolato:2021zic}
+Bla{\v z} Bortolato, Barry~M. Dillon, Jernej~F. Kamenik, and Aleks Smolkovi{\v
+  c}.
+\newblock {Bump hunting in latent space}.
+\newblock \emph{Phys. Rev. D}, 105:\penalty0 115009, 2022.
+\newblock \doi{10.1103/PhysRevD.105.115009}.
+
+\bibitem[Araz et~al.(2026)Araz, Athanasakos, Ploskon, and Ringer]{Araz:2025oax}
+Jack~Y. Araz, Dimitrios Athanasakos, Mateusz Ploskon, and Felix Ringer.
+\newblock {Graph theory inspired anomaly detection at the LHC}.
+\newblock \emph{JHEP}, 02:\penalty0 254, 2026.
+\newblock \doi{10.1007/JHEP02(2026)254}.
+
+\bibitem[Metodiev et~al.(2017)Metodiev, Nachman, and Thaler]{Metodiev:2017vrx}
+Eric~M. Metodiev, Benjamin Nachman, and Jesse Thaler.
+\newblock {Classification without labels: learning from mixed samples in high
+  energy physics}.
+\newblock \emph{JHEP}, 10:\penalty0 174, 2017.
+\newblock \doi{10.1007/JHEP10(2017)174}.
+
+\bibitem[Collins et~al.(2018)Collins, Howe, and Nachman]{Collins:2018epr}
+Jack~H. Collins, Kiel Howe, and Benjamin Nachman.
+\newblock {Anomaly detection for resonant new physics with machine learning}.
+\newblock \emph{Phys. Rev. Lett.}, 121:\penalty0 241803, 2018.
+\newblock \doi{10.1103/PhysRevLett.121.241803}.
 
 \end{thebibliography}
