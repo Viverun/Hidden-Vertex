@@ -33,3 +33,6 @@ Thumbs.db
 # Project specific
 *.lock
 uv.lock
+
+# Large training-set latents from Kaggle runs (not needed to reproduce results)
+results/**/latents_fit_*.npy

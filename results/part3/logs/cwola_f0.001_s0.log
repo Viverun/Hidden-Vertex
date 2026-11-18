@@ -1,0 +1,20 @@
+/home/viverun/Projects/Research_Project/Hidden-Vertex/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+fraction 0.001 seed 0: pool 955955, train 669168, ref 286787
+  grid a SR [-inf, 2.4): train SR/SB 82525/218835, iters 44-55, 15.3 s
+  grid a SR [2.4, 2.8): train SR/SB 218835/139980, iters 25-34, 16.3 s
+  grid a SR [2.8, 3.2): train SR/SB 161423/165058, iters 16-23, 13.6 s
+  grid a SR [3.2, 3.6): train SR/SB 94186/100436, iters 10-21, 9.6 s
+  grid a SR [3.6, 4.0): train SR/SB 52076/56520, iters 10-13, 6.6 s
+  grid a SR [4.0, 4.4): train SR/SB 27919/30965, iters 10-11, 4.8 s
+  grid a SR [4.4, 4.8): train SR/SB 15108/16702, iters 10-12, 3.8 s
+  grid a SR [4.8, inf): train SR/SB 17096/15108, iters 10-16, 3.7 s
+  grid b SR [-inf, 2.6): train SR/SB 190007/202127, iters 49-71, 24.7 s
+  grid b SR [2.6, 3.0): train SR/SB 202127/178131, iters 26-36, 21.4 s
+  grid b SR [3.0, 3.4): train SR/SB 124354/131255, iters 11-21, 12.8 s
+  grid b SR [3.4, 3.8): train SR/SB 70268/75994, iters 11-13, 7.5 s
+  grid b SR [3.8, 4.2): train SR/SB 38328/41667, iters 10-12, 5.3 s
+  grid b SR [4.2, 4.6): train SR/SB 20556/22471, iters 10-14, 4.5 s
+  grid b SR [4.6, 5.0): train SR/SB 11254/12094, iters 10-17, 3.2 s
+  grid b SR [5.0, inf): train SR/SB 12274/11254, iters 11-14, 3.0 s
+fraction 0.001 seed 0: done in 2.8 min

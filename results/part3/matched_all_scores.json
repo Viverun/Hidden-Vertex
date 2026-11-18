@@ -1,0 +1,210 @@
+{
+  "n_test": 10000,
+  "n_sig": 5000,
+  "settings": {
+    "n_bins_mult": 20,
+    "n_bins_2d": 8,
+    "clip_percentile": 99.0,
+    "confidence_intervals": null
+  },
+  "diagnostics": {
+    "mult": {
+      "clip_value": 2.8357142857142854,
+      "signal_fraction_in_cells_without_background": 0.0,
+      "n_cells": 20,
+      "bg_effective_sample_size": 2969.0799631048453
+    },
+    "mult_ht": {
+      "clip_value": 13.642857142857142,
+      "signal_fraction_in_cells_without_background": 0.0,
+      "n_cells": 64,
+      "bg_effective_sample_size": 830.526945031519
+    }
+  },
+  "results": {
+    "-|mjj-3500 GeV| (oracle)": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:-|mjj-3500| (oracle)"
+      ],
+      "plain": 0.90014572,
+      "mult": 0.8992204421702819,
+      "mult_ht": 0.8171217724520035
+    },
+    "-tau21 (leading jet)": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:-tau21 (leading jet)"
+      ],
+      "plain": 0.80136524,
+      "mult": 0.8120367317782089,
+      "mult_ht": 0.80487305519823
+    },
+    "kNN, jet4": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:knn_jet4",
+        "results/part3/density/scores_s1.npz:knn_jet4",
+        "results/part3/density/scores_s2.npz:knn_jet4"
+      ],
+      "plain": 0.7613851600000001,
+      "mult": 0.7535771079119399,
+      "mult_ht": 0.7293500598349473
+    },
+    "GMM, jet4": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:gmm_jet4",
+        "results/part3/density/scores_s1.npz:gmm_jet4",
+        "results/part3/density/scores_s2.npz:gmm_jet4"
+      ],
+      "plain": 0.7530176666666666,
+      "mult": 0.7444613234123341,
+      "mult_ht": 0.718332649359111
+    },
+    "WNAE pilot, jet5": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/wnae/scores_s0.npz:wnae_jet5",
+        "results/part3/wnae/scores_s1.npz:wnae_jet5",
+        "results/part3/wnae/scores_s2.npz:wnae_jet5"
+      ],
+      "plain": 0.7213597466666665,
+      "mult": 0.7226472551106958,
+      "mult_ht": 0.6799489465758007
+    },
+    "kNN, jet5": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:knn_jet5",
+        "results/part3/density/scores_s1.npz:knn_jet5",
+        "results/part3/density/scores_s2.npz:knn_jet5"
+      ],
+      "plain": 0.7166305200000002,
+      "mult": 0.7098868625030472,
+      "mult_ht": 0.6511817524236484
+    },
+    "GMM, jet5": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:gmm_jet5",
+        "results/part3/density/scores_s1.npz:gmm_jet5",
+        "results/part3/density/scores_s2.npz:gmm_jet5"
+      ],
+      "plain": 0.6943138933333333,
+      "mult": 0.6893169880451758,
+      "mult_ht": 0.6296293096334389
+    },
+    "WNAE long, jet5": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/wnae_long/scores_s0.npz:wnae_jet5",
+        "results/part3/wnae_long/scores_s1.npz:wnae_jet5",
+        "results/part3/wnae_long/scores_s2.npz:wnae_jet5"
+      ],
+      "plain": 0.63651936,
+      "mult": 0.6306199495353991,
+      "mult_ht": 0.5705078673987759
+    },
+    "Node-level GAE (Part 1 AE, mean)": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:Part 1 AE (mean)"
+      ],
+      "plain": 0.78098428,
+      "mult": 0.6703280487398897,
+      "mult_ht": 0.5702945501472128
+    },
+    "mjj": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:mjj"
+      ],
+      "plain": 0.7881254,
+      "mult": 0.7755270468942309,
+      "mult_ht": 0.5395663023422965
+    },
+    "mean pT per particle": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:mean pT per particle"
+      ],
+      "plain": 0.8114028,
+      "mult": 0.670003221679899,
+      "mult_ht": 0.5090025806482161
+    },
+    "HT (sum pT)": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:HT (sum pT)"
+      ],
+      "plain": 0.79221672,
+      "mult": 0.8329079921116626,
+      "mult_ht": 0.5096730733724901
+    },
+    "-multiplicity": {
+      "n_seeds": 1,
+      "sources": [
+        "results/part2/bank.npz:-multiplicity"
+      ],
+      "plain": 0.71470132,
+      "mult": 0.49948865019653527,
+      "mult_ht": 0.5135290288136349
+    },
+    "MLP autoencoder, jet4": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:ae_jet4",
+        "results/part3/density/scores_s1.npz:ae_jet4",
+        "results/part3/density/scores_s2.npz:ae_jet4"
+      ],
+      "plain": 0.5386072066666667,
+      "mult": 0.53407653473854,
+      "mult_ht": 0.5264204561367724
+    },
+    "MLP autoencoder, jet5": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part3/density/scores_s0.npz:ae_jet5",
+        "results/part3/density/scores_s1.npz:ae_jet5",
+        "results/part3/density/scores_s2.npz:ae_jet5"
+      ],
+      "plain": 0.5049013933333333,
+      "mult": 0.5082518546183418,
+      "mult_ht": 0.49065248744029716
+    },
+    "Event-level GAE: Chamfer": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part2/runs/main/scores_s0.npz:chamfer",
+        "results/part2/runs/main/scores_s1.npz:chamfer",
+        "results/part2/runs/main/scores_s2.npz:chamfer"
+      ],
+      "plain": 0.42803265333333335,
+      "mult": 0.457232845533081,
+      "mult_ht": 0.43775865282190884
+    },
+    "Event-level GAE: kNN": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part2/runs/main/scores_s0.npz:knn",
+        "results/part2/runs/main/scores_s1.npz:knn",
+        "results/part2/runs/main/scores_s2.npz:knn"
+      ],
+      "plain": 0.40090659999999995,
+      "mult": 0.4611067206871962,
+      "mult_ht": 0.44798361326490954
+    },
+    "Event-level GAE: GMM": {
+      "n_seeds": 3,
+      "sources": [
+        "results/part2/runs/main/scores_s0.npz:gmm",
+        "results/part2/runs/main/scores_s1.npz:gmm",
+        "results/part2/runs/main/scores_s2.npz:gmm"
+      ],
+      "plain": 0.43634320000000004,
+      "mult": 0.4947439321775322,
+      "mult_ht": 0.46951098494379107
+    }
+  }
+}

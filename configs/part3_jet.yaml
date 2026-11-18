@@ -1,0 +1,106 @@
+# configs/part3_jet.yaml  --  Part 3A (jet-feature density scores) and Part 3B (WNAE).
+# Every choice here was fixed before any Part 3 test-set result was seen. Test AUC is never used to choose
+# a model, a sign, an epoch or a hyperparameter. Score sign: higher = more anomalous.
+data:
+  features_path: "dataset/raw/events_anomalydetection_v2.features.h5"   # pandas HDF, sorted bg then signal
+  bank_path: "results/part2/bank.npz"     # Part 2 baselines + covariates on the same frozen test set
+
+split:                                    # identical to configs/part2_main.yaml (plan_rows on the label column)
+  skip_bg: 40000                          # test bg = bg rows 40,000-44,999; test sig = signal rows 1,000,000-1,004,999
+  n_test_bg: 5000
+  n_test_sig: 5000
+  n_train: 200000                         # bg rows 45,000-244,999
+  val_fraction: 0.1                       # last 20,000 = validation; first 180,000 = fit set
+
+features:
+  headline: jet5                          # mj1, mj2, tau21_j1, tau21_j2, mjj  (gate rows, group 'model')
+  variants: [jet4]                        # jet5 without mjj (group 'variant')
+  quantile:                               # sklearn QuantileTransformer, fit on the 180,000 fit events only
+    output_distribution: normal
+    n_quantiles: 1000
+    random_state: 0
+
+density:                                  # Part 3A; all scorers fit on the fit set only
+  seeds: [0, 1, 2]                        # kNN is deterministic; it is still stored per seed
+  gmm_components: 8                       # GMMScorer (full covariance, internal standardizer)
+  knn_k: 20                               # KNNScorer (mean distance to 20 nearest fit events)
+  ae:                                     # MLPAE d-32-32-3-32-32-d, GELU, linear latent and output
+    hidden: [32, 32]
+    latent: 3
+    epochs: 30
+    batch_size: 256
+    learning_rate: 0.001                  # AdamW
+    weight_decay: 0.00001
+    patience: 5                           # early stop on validation MSE; best state restored
+
+wnae:                                     # Part 3B, inputs/preprocessing/architecture = 3A AE on jet5
+  feature_set: jet5
+  seeds: [0, 1, 2]
+  batch_size: 4096
+  learning_rate: 0.0002                   # Adam (no weight decay)
+  scheduler:                              # ReduceLROnPlateau on the validation Wasserstein distance
+    factor: 0.8
+    patience: 20
+    cooldown: 10
+    threshold: 0.001
+    threshold_mode: rel
+  mcmc:
+    n_steps: 10
+    step_size: 0.0242                     # lambda (= sigma^2 / 2, as the reference when x_step_size is None)
+    noise_std: 0.22                       # sigma
+    temperature: 0.063                    # T
+    restart_fraction: 0.05                # PCD: 5% of chains restart from N(0,1) (our choice: inputs are
+                                          # quantile-normalized to a standard normal)
+    bound: [-3.0, 3.0]                    # samples clipped after each step; the reference example uses
+                                          # x_bound (-3, 3) for standard-normal-scaled inputs
+  buffer_size: 10000                      # reference default (FIFO; draws with replacement)
+  ot_num_iter_max: 10000000               # exact network simplex; a non-optimal exit is counted per epoch
+  # Fixed from the timing run (scripts/part3_run.py wnae-time) BEFORE any test AUC was computed:
+  # one epoch (43 batches of 4096 + validation, 3 seeds in parallel, 4 threads each) took 382 s, 395 s and
+  # 520 s (seed 1 overlapped a 4th process at its end; results/part3/wnae/timing_s*.json).
+  # 6 epochs fixed from the two clean timings: 6 x ~390 s = ~39 min per seed.
+  max_epochs: 6
+  torch_threads: 4                        # 3 seeds run in parallel processes on 12 cores
+  # Model selection: the epoch with the lowest validation Wasserstein distance (signal-agnostic).
+  # Validation MCMC uses a fixed noise generator per seed so epochs are compared on the same noise.
+  # Differences from the reference code (github.com/fleble/wnae):
+  #  - ground cost is Euclidean (W1, as fixed in the brief); the reference uses ot.dist's default
+  #    squared Euclidean cost;
+  #  - the scheduler steps once per epoch on the validation W; the reference steps it on the training loss;
+  #  - Adam lr 2e-4, batch 4096 (brief); reference example uses AdamW 5e-3, batch 256.
+
+wnae_long:                                # Part 3B second run, tag `wnae_long` (results/part3/wnae_long).
+  # Keys here override the `wnae` pilot section; every other setting is identical to the pilot (MCMC, lr,
+  # scheduler, buffer, bounds, architecture, jet5, seeds 0,1,2).
+  # Fixed by the supervisor AFTER the pilot test AUCs had been seen, for convergence and cost reasons only
+  # (pilot: best epoch = last epoch, val W still falling, negative std 0.46-0.82 vs 1.0). These settings were
+  # not chosen from the pilot test AUCs.
+  batch_size: 1024                        # deviation from the paper's 4096: exact OT cost grows ~n^2-n^3
+                                          # (validation W also uses batches of 1024, same fixed noise per seed)
+  max_epochs: 150                         # kept: 2-epoch timing, 3 seeds in parallel x 4 threads, gave
+                                          # 23-53 s/epoch (results/part3/wnae_long/timing_s*.json); 150 x 53 s
+                                          # = 2.2 h < 3 h limit. Fixed before training.
+  es_patience: 30                         # stop when val W has not improved by > 0.1% (rel) for 30 epochs
+  es_threshold: 0.001
+  # ot.emd2 numThreads: no speedup measured (1024: 0.095 s for 1/4/12 threads; 4096: 2.8 s), so unused.
+
+reverse:                                  # Part 3 reverse-direction diagnostic (uses signal labels; NOT an
+                                          # anomaly-detection result). Density scorers + plain AE only.
+  # Signal events not in the test set: signal rows 1,005,000 onward (signal index 5,000+).
+  skip_sig: 5000                          # signal rows 1,000,000-1,004,999 are the test signal
+  n_fit: 76000                            # fit = signal rows 1,005,000-1,080,999
+  n_val: 9000                             # AE validation = signal rows 1,081,000-1,089,999
+  # Same feature sets, quantile recipe (refit on this fit set), scorers, AE settings and seeds as `density`.
+  # The frozen test set is scored with background as the positive ("anomalous") class.
+
+benchmark:
+  n_boot: 1000
+  baseline_ci_level: 0.95
+  model_ci_level: 0.983                   # jet5 gate rows and jet4 variant rows (Bonferroni, as Part 2)
+  wnae_ci_level: 0.95
+  n_bins: 10
+  min_within_bin: 0.6
+  sic_min_fpr: 0.001                      # max SIC = max TPR/sqrt(FPR) over FPR >= 1e-3 (5,000 bg test events)
+  sic_fprs: [0.01, 0.1]                   # TPR and SIC also reported at these FPRs (linear ROC interpolation)
+
+output_dir: "results/part3"

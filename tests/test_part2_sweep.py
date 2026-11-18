@@ -25,7 +25,7 @@ def test_contamination_stage():
     jobs = build_jobs('contamination')
     assert sorted((t, o[0]) for t, _, o in jobs) == [('contam1', 'split.contamination=0.01'),
                                                      ('contam9', 'split.contamination=0.09')]
-    assert set(GRIDS) == {'main', 'ablations', 'contamination'}
+    assert set(GRIDS) == {'main', 'ablations', 'contamination', 'multmatch'}
 
 
 def _write_run(output_dir, tag, seed, metrics=True, scores=True, corrupt=False):

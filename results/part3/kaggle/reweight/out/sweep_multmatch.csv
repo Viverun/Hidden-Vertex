@@ -1,0 +1,4 @@
+tag,seed,auc_chamfer,auc_knn,auc_gmm,epochs,sec_per_epoch,params
+multmatch,0,0.4208,0.4203,0.4304,30,34.4,95888
+multmatch,1,0.4131,0.4076,0.4295,22,35.0,95888
+multmatch,2,0.4123,0.3677,0.4126,30,35.6,95888

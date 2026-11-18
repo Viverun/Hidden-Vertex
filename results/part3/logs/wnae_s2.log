@@ -1,0 +1,7 @@
+[s2] epoch 1: train W 1.3068 val W 1.3064 E+ 1.0007 E- 0.1735 lr 2.00e-04 (395 s)
+[s2] epoch 2: train W 1.2996 val W 1.2982 E+ 0.9875 E- 0.1737 lr 2.00e-04 (304 s)
+[s2] epoch 3: train W 1.2907 val W 1.2841 E+ 0.9506 E- 0.1728 lr 2.00e-04 (217 s)
+[s2] epoch 4: train W 1.2547 val W 1.2057 E+ 0.8351 E- 0.1712 lr 2.00e-04 (170 s)
+[s2] epoch 5: train W 1.1278 val W 1.1017 E+ 0.7375 E- 0.1724 lr 2.00e-04 (174 s)
+[s2] epoch 6: train W 1.0673 val W 1.0416 E+ 0.6711 E- 0.1687 lr 2.00e-04 (229 s)
+[s2] done: best epoch 6, 24.8 min

@@ -1,0 +1,17 @@
+{
+  "seed": 2,
+  "feature_sets": {
+    "jet5": {
+      "gmm_converged": true,
+      "ae_best_epoch": 30,
+      "ae_epochs_run": 30,
+      "ae_best_val_loss": 0.09873342514038086
+    },
+    "jet4": {
+      "gmm_converged": true,
+      "ae_best_epoch": 30,
+      "ae_epochs_run": 30,
+      "ae_best_val_loss": 0.04879765585064888
+    }
+  }
+}

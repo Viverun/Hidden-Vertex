@@ -1,0 +1,326 @@
+/home/viverun/Projects/Research_Project/Hidden-Vertex/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+f0.001 s0: exists, skipped
+[f0 s0] fraction 0 seed 0: pool 955000, train 668500, ref 286500
+[f0 s2] fraction 0 seed 2: pool 955000, train 668500, ref 286500
+[f0.0005 s1] fraction 0.0005 seed 1: pool 955478, train 668835, ref 286643
+[f0 s1] fraction 0 seed 1: pool 955000, train 668500, ref 286500
+[f0.0005 s0] fraction 0.0005 seed 0: pool 955478, train 668835, ref 286643
+[f0.0005 s2] fraction 0.0005 seed 2: pool 955478, train 668835, ref 286643
+[f0 s1]   grid a SR [-inf, 2.4): train SR/SB 82374/218339, iters 40-62, 36.0 s
+[f0.0005 s1]   grid a SR [-inf, 2.4): train SR/SB 82451/218247, iters 45-55, 36.3 s
+[f0 s0]   grid a SR [-inf, 2.4): train SR/SB 82460/218873, iters 43-64, 37.2 s
+[f0.0005 s0]   grid a SR [-inf, 2.4): train SR/SB 82369/218749, iters 43-58, 36.6 s
+[f0.0005 s2]   grid a SR [-inf, 2.4): train SR/SB 82181/219190, iters 46-57, 36.6 s
+[f0 s2]   grid a SR [-inf, 2.4): train SR/SB 82180/218997, iters 41-59, 37.2 s
+[f0.0005 s0]   grid a SR [2.4, 2.8): train SR/SB 218749/139994, iters 25-32, 36.3 s
+[f0.0005 s1]   grid a SR [2.4, 2.8): train SR/SB 218247/140258, iters 26-35, 37.3 s
+[f0 s0]   grid a SR [2.4, 2.8): train SR/SB 218873/139930, iters 23-34, 37.0 s
+[f0.0005 s2]   grid a SR [2.4, 2.8): train SR/SB 219190/139936, iters 25-35, 37.1 s
+[f0 s1]   grid a SR [2.4, 2.8): train SR/SB 218339/140294, iters 26-34, 37.8 s
+[f0 s2]   grid a SR [2.4, 2.8): train SR/SB 218997/139986, iters 26-35, 37.3 s
+[f0.0005 s0]   grid a SR [2.8, 3.2): train SR/SB 161364/164886, iters 17-25, 35.5 s
+[f0.0005 s1]   grid a SR [2.8, 3.2): train SR/SB 161875/164599, iters 17-20, 35.5 s
+[f0 s1]   grid a SR [2.8, 3.2): train SR/SB 161908/164637, iters 18-22, 35.2 s
+[f0.0005 s2]   grid a SR [2.8, 3.2): train SR/SB 161450/165123, iters 15-23, 35.5 s
+[f0 s0]   grid a SR [2.8, 3.2): train SR/SB 161157/164821, iters 15-30, 35.7 s
+[f0 s2]   grid a SR [2.8, 3.2): train SR/SB 161505/164886, iters 17-28, 35.7 s
+[f0.0005 s0]   grid a SR [3.2, 3.6): train SR/SB 94044/100318, iters 11-19, 20.4 s
+[f0.0005 s1]   grid a SR [3.2, 3.6): train SR/SB 93813/100717, iters 10-15, 20.0 s
+[f0.0005 s2]   grid a SR [3.2, 3.6): train SR/SB 94086/100276, iters 11-15, 20.0 s
+[f0 s1]   grid a SR [3.2, 3.6): train SR/SB 93599/100591, iters 10-15, 20.2 s
+[f0 s0]   grid a SR [3.2, 3.6): train SR/SB 93796/100150, iters 10-15, 20.1 s
+[f0 s2]   grid a SR [3.2, 3.6): train SR/SB 93860/100164, iters 10-15, 19.9 s
+[f0.0005 s0]   grid a SR [3.6, 4.0): train SR/SB 52155/56377, iters 10-11, 12.1 s
+[f0.0005 s1]   grid a SR [3.6, 4.0): train SR/SB 52227/56294, iters 10-12, 12.0 s
+[f0 s1]   grid a SR [3.6, 4.0): train SR/SB 52173/56031, iters 10-13, 12.1 s
+[f0.0005 s2]   grid a SR [3.6, 4.0): train SR/SB 51936/56282, iters 10-13, 12.4 s
+[f0 s0]   grid a SR [3.6, 4.0): train SR/SB 51972/56252, iters 10-14, 12.2 s
+[f0 s2]   grid a SR [3.6, 4.0): train SR/SB 51818/56139, iters 10-17, 12.3 s
+[f0.0005 s1]   grid a SR [4.0, 4.4): train SR/SB 28050/30945, iters 10-13, 8.5 s
+[f0.0005 s0]   grid a SR [4.0, 4.4): train SR/SB 27940/31024, iters 10-11, 8.6 s
+[f0 s1]   grid a SR [4.0, 4.4): train SR/SB 27973/30920, iters 10-13, 8.5 s
+[f0.0005 s2]   grid a SR [4.0, 4.4): train SR/SB 27876/30721, iters 10-10, 8.5 s
+[f0 s0]   grid a SR [4.0, 4.4): train SR/SB 27968/30936, iters 10-11, 8.5 s
+[f0 s2]   grid a SR [4.0, 4.4): train SR/SB 27933/30816, iters 10-14, 8.5 s
+[f0.0005 s1]   grid a SR [4.4, 4.8): train SR/SB 15124/16769, iters 10-13, 5.9 s
+[f0.0005 s0]   grid a SR [4.4, 4.8): train SR/SB 15100/16765, iters 10-13, 5.9 s
+[f0 s1]   grid a SR [4.4, 4.8): train SR/SB 15124/16692, iters 10-11, 5.9 s
+[f0.0005 s2]   grid a SR [4.4, 4.8): train SR/SB 15047/16672, iters 10-11, 5.9 s
+[f0 s0]   grid a SR [4.4, 4.8): train SR/SB 15149/16753, iters 10-12, 5.9 s
+[f0 s2]   grid a SR [4.4, 4.8): train SR/SB 15137/16746, iters 10-15, 5.9 s
+[f0.0005 s1]   grid a SR [4.8, inf): train SR/SB 17048/15124, iters 10-14, 6.0 s
+[f0.0005 s0]   grid a SR [4.8, inf): train SR/SB 17114/15100, iters 10-16, 5.9 s
+[f0 s1]   grid a SR [4.8, inf): train SR/SB 17010/15124, iters 10-16, 5.9 s
+[f0.0005 s2]   grid a SR [4.8, inf): train SR/SB 17069/15047, iters 10-14, 6.1 s
+[f0 s0]   grid a SR [4.8, inf): train SR/SB 17125/15149, iters 11-13, 6.1 s
+[f0 s2]   grid a SR [4.8, inf): train SR/SB 17070/15137, iters 10-11, 6.4 s
+[f0 s1]   grid b SR [-inf, 2.6): train SR/SB 189707/202217, iters 43-66, 48.5 s
+[f0.0005 s2]   grid b SR [-inf, 2.6): train SR/SB 190018/202347, iters 45-60, 48.2 s
+[f0.0005 s0]   grid b SR [-inf, 2.6): train SR/SB 189913/202030, iters 48-58, 48.9 s
+[f0.0005 s1]   grid b SR [-inf, 2.6): train SR/SB 189707/202072, iters 48-68, 49.2 s
+[f0 s0]   grid b SR [-inf, 2.6): train SR/SB 190099/201985, iters 46-65, 48.7 s
+[f0 s2]   grid b SR [-inf, 2.6): train SR/SB 189973/202231, iters 46-63, 48.4 s
+[f0.0005 s2]   grid b SR [2.6, 3.0): train SR/SB 202347/178293, iters 22-34, 40.2 s
+[f0.0005 s0]   grid b SR [2.6, 3.0): train SR/SB 202030/178083, iters 25-37, 40.0 s
+[f0 s1]   grid b SR [2.6, 3.0): train SR/SB 202217/178030, iters 25-39, 40.9 s
+[f0.0005 s1]   grid b SR [2.6, 3.0): train SR/SB 202072/178050, iters 24-38, 40.4 s
+[f0 s0]   grid b SR [2.6, 3.0): train SR/SB 201985/178045, iters 25-36, 41.3 s
+[f0 s2]   grid b SR [2.6, 3.0): train SR/SB 202231/178271, iters 23-38, 40.9 s
+[f0.0005 s2]   grid b SR [3.0, 3.4): train SR/SB 124226/131310, iters 12-19, 25.9 s
+[f0.0005 s0]   grid b SR [3.0, 3.4): train SR/SB 124220/131188, iters 12-18, 26.4 s
+[f0.0005 s1]   grid b SR [3.0, 3.4): train SR/SB 124402/131286, iters 12-19, 26.3 s
+[f0 s1]   grid b SR [3.0, 3.4): train SR/SB 124328/131179, iters 13-22, 26.7 s
+[f0 s0]   grid b SR [3.0, 3.4): train SR/SB 123993/130960, iters 12-18, 26.2 s
+[f0 s2]   grid b SR [3.0, 3.4): train SR/SB 124160/131205, iters 13-19, 26.3 s
+[f0.0005 s2]   grid b SR [3.4, 3.8): train SR/SB 70136/75886, iters 10-11, 16.1 s
+[f0.0005 s0]   grid b SR [3.4, 3.8): train SR/SB 70142/76057, iters 10-18, 16.1 s
+[f0.0005 s1]   grid b SR [3.4, 3.8): train SR/SB 70128/75912, iters 10-13, 15.9 s
+[f0 s1]   grid b SR [3.4, 3.8): train SR/SB 69862/75910, iters 10-11, 15.8 s
+[f0 s2]   grid b SR [3.4, 3.8): train SR/SB 69864/75814, iters 10-13, 15.7 s
+[f0 s0]   grid b SR [3.4, 3.8): train SR/SB 69953/75815, iters 10-15, 15.9 s
+[f0.0005 s2]   grid b SR [3.8, 4.2): train SR/SB 38082/41730, iters 10-11, 9.8 s
+[f0.0005 s0]   grid b SR [3.8, 4.2): train SR/SB 38390/41705, iters 10-20, 10.0 s
+[f0.0005 s1]   grid b SR [3.8, 4.2): train SR/SB 38393/41884, iters 10-12, 10.1 s
+[f0 s1]   grid b SR [3.8, 4.2): train SR/SB 38342/41804, iters 10-13, 9.9 s
+[f0 s2]   grid b SR [3.8, 4.2): train SR/SB 38093/41658, iters 10-18, 10.0 s
+[f0 s0]   grid b SR [3.8, 4.2): train SR/SB 38271/41669, iters 10-13, 10.0 s
+[f0.0005 s2]   grid b SR [4.2, 4.6): train SR/SB 20515/22408, iters 10-13, 6.9 s
+[f0.0005 s0]   grid b SR [4.2, 4.6): train SR/SB 20574/22466, iters 10-15, 6.8 s
+[f0.0005 s1]   grid b SR [4.2, 4.6): train SR/SB 20602/22572, iters 10-14, 6.8 s
+[f0 s1]   grid b SR [4.2, 4.6): train SR/SB 20551/22546, iters 10-14, 6.9 s
+[f0 s2]   grid b SR [4.2, 4.6): train SR/SB 20656/22414, iters 10-14, 6.8 s
+[f0 s0]   grid b SR [4.2, 4.6): train SR/SB 20633/22484, iters 10-13, 6.8 s
+[f0.0005 s2]   grid b SR [4.6, 5.0): train SR/SB 11204/12075, iters 10-12, 5.2 s
+[f0.0005 s0]   grid b SR [4.6, 5.0): train SR/SB 11291/12081, iters 10-11, 5.2 s
+[f0.0005 s1]   grid b SR [4.6, 5.0): train SR/SB 11291/12096, iters 10-15, 5.1 s
+[f0 s1]   grid b SR [4.6, 5.0): train SR/SB 11265/12099, iters 10-13, 5.1 s
+[f0 s2]   grid b SR [4.6, 5.0): train SR/SB 11227/12163, iters 10-11, 5.1 s
+[f0 s0]   grid b SR [4.6, 5.0): train SR/SB 11269/12128, iters 10-14, 5.1 s
+[f0.0005 s2]   grid b SR [5.0, inf): train SR/SB 12307/11204, iters 10-13, 5.5 s
+[f0.0005 s0]   grid b SR [5.0, inf): train SR/SB 12275/11291, iters 10-15, 5.8 s
+[f0.0005 s1]   grid b SR [5.0, inf): train SR/SB 12240/11291, iters 10-12, 5.8 s
+[f0 s1]   grid b SR [5.0, inf): train SR/SB 12228/11265, iters 10-15, 5.9 s
+[f0 s2]   grid b SR [5.0, inf): train SR/SB 12296/11227, iters 10-15, 6.2 s
+[f0 s0]   grid b SR [5.0, inf): train SR/SB 12297/11269, iters 10-18, 6.4 s
+[f0.0005 s2] fraction 0.0005 seed 2: done in 5.7 min
+[f0.0005 s1] fraction 0.0005 seed 1: done in 5.7 min
+[f0.0005 s0] fraction 0.0005 seed 0: done in 5.7 min
+[f0 s1] fraction 0 seed 1: done in 5.7 min
+[f0.001 s1] fraction 0.001 seed 1: pool 955955, train 669168, ref 286787
+[f0 s2] fraction 0 seed 2: done in 5.7 min
+[f0.001 s2] fraction 0.001 seed 2: pool 955955, train 669168, ref 286787
+[f0 s0] fraction 0 seed 0: done in 5.8 min
+finished f0 s0 (5.8 min)
+finished f0 s1 (5.7 min)
+finished f0 s2 (5.7 min)
+finished f0.0005 s0 (5.7 min)
+finished f0.0005 s1 (5.7 min)
+finished f0.0005 s2 (5.7 min)
+[f0.002 s0] fraction 0.002 seed 0: pool 956910, train 669837, ref 287073
+[f0.002 s1] fraction 0.002 seed 1: pool 956910, train 669837, ref 287073
+[f0.002 s2] fraction 0.002 seed 2: pool 956910, train 669837, ref 287073
+[f0.005 s0] fraction 0.005 seed 0: pool 959775, train 671842, ref 287933
+[f0.001 s1]   grid a SR [-inf, 2.4): train SR/SB 82462/218271, iters 43-61, 38.8 s
+[f0.001 s2]   grid a SR [-inf, 2.4): train SR/SB 82257/219013, iters 43-61, 38.9 s
+[f0.002 s0]   grid a SR [-inf, 2.4): train SR/SB 82483/218870, iters 48-63, 38.4 s
+[f0.002 s1]   grid a SR [-inf, 2.4): train SR/SB 82438/218455, iters 40-53, 38.6 s
+[f0.005 s0]   grid a SR [-inf, 2.4): train SR/SB 82501/218816, iters 47-52, 37.9 s
+[f0.002 s2]   grid a SR [-inf, 2.4): train SR/SB 82253/219007, iters 43-60, 40.0 s
+[f0.001 s2]   grid a SR [2.4, 2.8): train SR/SB 219013/140065, iters 24-34, 40.5 s
+[f0.002 s0]   grid a SR [2.4, 2.8): train SR/SB 218870/139887, iters 23-31, 40.9 s
+[f0.001 s1]   grid a SR [2.4, 2.8): train SR/SB 218271/140225, iters 27-34, 41.7 s
+[f0.005 s0]   grid a SR [2.4, 2.8): train SR/SB 218816/140198, iters 26-30, 40.6 s
+[f0.002 s1]   grid a SR [2.4, 2.8): train SR/SB 218455/140266, iters 27-34, 41.5 s
+[f0.002 s2]   grid a SR [2.4, 2.8): train SR/SB 219007/140075, iters 25-45, 41.6 s
+[f0.002 s0]   grid a SR [2.8, 3.2): train SR/SB 161186/165066, iters 16-22, 34.0 s
+[f0.001 s2]   grid a SR [2.8, 3.2): train SR/SB 161562/165026, iters 16-23, 34.7 s
+[f0.001 s1]   grid a SR [2.8, 3.2): train SR/SB 161755/164792, iters 17-27, 35.0 s
+[f0.002 s1]   grid a SR [2.8, 3.2): train SR/SB 161945/165038, iters 16-26, 34.6 s
+[f0.005 s0]   grid a SR [2.8, 3.2): train SR/SB 161588/165611, iters 19-26, 35.2 s
+[f0.002 s2]   grid a SR [2.8, 3.2): train SR/SB 161593/165187, iters 16-28, 35.6 s
+[f0.001 s2]   grid a SR [3.2, 3.6): train SR/SB 94281/100275, iters 10-20, 21.6 s
+[f0.002 s0]   grid a SR [3.2, 3.6): train SR/SB 94758/100437, iters 12-24, 22.1 s
+[f0.001 s1]   grid a SR [3.2, 3.6): train SR/SB 94094/100725, iters 10-17, 21.9 s
+[f0.002 s1]   grid a SR [3.2, 3.6): train SR/SB 94436/100928, iters 13-20, 22.4 s
+[f0.005 s0]   grid a SR [3.2, 3.6): train SR/SB 96045/100896, iters 17-28, 23.7 s
+[f0.002 s2]   grid a SR [3.2, 3.6): train SR/SB 94777/100439, iters 13-23, 22.4 s
+[f0.001 s2]   grid a SR [3.6, 4.0): train SR/SB 51919/56506, iters 10-12, 12.8 s
+[f0.002 s0]   grid a SR [3.6, 4.0): train SR/SB 52202/56974, iters 10-15, 13.0 s
+[f0.001 s1]   grid a SR [3.6, 4.0): train SR/SB 52319/56343, iters 10-12, 12.6 s
+[f0.002 s1]   grid a SR [3.6, 4.0): train SR/SB 52437/56613, iters 11-18, 13.0 s
+[f0.005 s0]   grid a SR [3.6, 4.0): train SR/SB 52668/57743, iters 17-25, 13.0 s
+[f0.002 s2]   grid a SR [3.6, 4.0): train SR/SB 52075/56813, iters 10-19, 12.6 s
+[f0.001 s2]   grid a SR [4.0, 4.4): train SR/SB 27947/30800, iters 10-13, 9.2 s
+[f0.002 s0]   grid a SR [4.0, 4.4): train SR/SB 28008/31012, iters 10-13, 9.1 s
+[f0.001 s1]   grid a SR [4.0, 4.4): train SR/SB 28061/30927, iters 10-13, 8.9 s
+[f0.002 s1]   grid a SR [4.0, 4.4): train SR/SB 28010/30993, iters 10-12, 8.5 s
+[f0.005 s0]   grid a SR [4.0, 4.4): train SR/SB 27949/31074, iters 10-15, 8.1 s
+[f0.002 s2]   grid a SR [4.0, 4.4): train SR/SB 27929/30859, iters 10-13, 7.9 s
+[f0.001 s2]   grid a SR [4.4, 4.8): train SR/SB 15153/16727, iters 10-13, 5.6 s
+[f0.002 s0]   grid a SR [4.4, 4.8): train SR/SB 15169/16764, iters 10-11, 5.6 s
+[f0.001 s1]   grid a SR [4.4, 4.8): train SR/SB 15129/16770, iters 10-13, 5.6 s
+[f0.002 s1]   grid a SR [4.4, 4.8): train SR/SB 15116/16757, iters 10-13, 5.5 s
+[f0.005 s0]   grid a SR [4.4, 4.8): train SR/SB 15184/16703, iters 10-11, 5.4 s
+[f0.002 s2]   grid a SR [4.4, 4.8): train SR/SB 15124/16721, iters 10-12, 5.5 s
+[f0.001 s2]   grid a SR [4.8, inf): train SR/SB 17036/15153, iters 10-12, 5.6 s
+[f0.002 s0]   grid a SR [4.8, inf): train SR/SB 17161/15169, iters 11-15, 5.7 s
+[f0.001 s1]   grid a SR [4.8, inf): train SR/SB 17077/15129, iters 10-14, 5.5 s
+[f0.002 s1]   grid a SR [4.8, inf): train SR/SB 17000/15116, iters 10-16, 5.9 s
+[f0.005 s0]   grid a SR [4.8, inf): train SR/SB 17091/15184, iters 11-15, 6.5 s
+[f0.002 s2]   grid a SR [4.8, inf): train SR/SB 17079/15124, iters 10-14, 6.7 s
+[f0.001 s2]   grid b SR [-inf, 2.6): train SR/SB 190003/202332, iters 47-58, 49.3 s
+[f0.002 s0]   grid b SR [-inf, 2.6): train SR/SB 190145/201864, iters 45-65, 50.3 s
+[f0.001 s1]   grid b SR [-inf, 2.6): train SR/SB 189765/202019, iters 50-71, 51.3 s
+[f0.002 s1]   grid b SR [-inf, 2.6): train SR/SB 189731/202283, iters 45-67, 52.7 s
+[f0.005 s0]   grid b SR [-inf, 2.6): train SR/SB 190043/202267, iters 43-67, 50.8 s
+[f0.002 s2]   grid b SR [-inf, 2.6): train SR/SB 190020/202256, iters 43-61, 50.2 s
+[f0.001 s2]   grid b SR [2.6, 3.0): train SR/SB 202332/178243, iters 25-34, 40.6 s
+[f0.002 s0]   grid b SR [2.6, 3.0): train SR/SB 201864/178192, iters 24-35, 40.6 s
+[f0.001 s1]   grid b SR [2.6, 3.0): train SR/SB 202019/178007, iters 23-34, 41.2 s
+[f0.005 s0]   grid b SR [2.6, 3.0): train SR/SB 202267/178137, iters 24-33, 40.6 s
+[f0.002 s2]   grid b SR [2.6, 3.0): train SR/SB 202256/178344, iters 23-31, 40.7 s
+[f0.002 s1]   grid b SR [2.6, 3.0): train SR/SB 202283/178117, iters 26-34, 41.1 s
+[f0.001 s2]   grid b SR [3.0, 3.4): train SR/SB 124256/131587, iters 13-17, 26.7 s
+[f0.002 s0]   grid b SR [3.0, 3.4): train SR/SB 124388/131556, iters 13-19, 27.2 s
+[f0.001 s1]   grid b SR [3.0, 3.4): train SR/SB 124528/131321, iters 12-20, 26.8 s
+[f0.002 s2]   grid b SR [3.0, 3.4): train SR/SB 124524/131846, iters 11-18, 26.9 s
+[f0.005 s0]   grid b SR [3.0, 3.4): train SR/SB 124932/132701, iters 13-22, 27.5 s
+[f0.002 s1]   grid b SR [3.0, 3.4): train SR/SB 124700/131681, iters 15-21, 27.1 s
+[f0.001 s2]   grid b SR [3.4, 3.8): train SR/SB 70300/75900, iters 10-14, 18.1 s
+[f0.002 s0]   grid b SR [3.4, 3.8): train SR/SB 70807/76153, iters 10-16, 18.0 s
+[f0.001 s1]   grid b SR [3.4, 3.8): train SR/SB 70291/76122, iters 10-19, 17.4 s
+[f0.002 s2]   grid b SR [3.4, 3.8): train SR/SB 70692/76160, iters 12-19, 17.1 s
+[f0.002 s1]   grid b SR [3.4, 3.8): train SR/SB 70664/76209, iters 11-29, 16.9 s
+[f0.005 s0]   grid b SR [3.4, 3.8): train SR/SB 72009/76704, iters 20-30, 17.6 s
+[f0.001 s2]   grid b SR [3.8, 4.2): train SR/SB 38125/41741, iters 10-14, 9.6 s
+[f0.002 s0]   grid b SR [3.8, 4.2): train SR/SB 38369/41841, iters 10-15, 9.9 s
+[f0.001 s1]   grid b SR [3.8, 4.2): train SR/SB 38371/42009, iters 10-11, 10.0 s
+[f0.002 s2]   grid b SR [3.8, 4.2): train SR/SB 38196/41808, iters 10-13, 10.1 s
+[f0.002 s1]   grid b SR [3.8, 4.2): train SR/SB 38386/42061, iters 10-12, 10.1 s
+[f0.005 s0]   grid b SR [3.8, 4.2): train SR/SB 38402/42215, iters 12-17, 10.6 s
+[f0.001 s2]   grid b SR [4.2, 4.6): train SR/SB 20622/22478, iters 10-13, 7.9 s
+[f0.002 s0]   grid b SR [4.2, 4.6): train SR/SB 20651/22526, iters 10-11, 7.8 s
+[f0.001 s1]   grid b SR [4.2, 4.6): train SR/SB 20617/22573, iters 10-15, 7.7 s
+[f0.002 s1]   grid b SR [4.2, 4.6): train SR/SB 20617/22509, iters 10-13, 6.9 s
+[f0.002 s2]   grid b SR [4.2, 4.6): train SR/SB 20592/22461, iters 10-15, 7.0 s
+[f0.001 s2]   grid b SR [4.6, 5.0): train SR/SB 11258/12117, iters 10-12, 5.3 s
+[f0.005 s0]   grid b SR [4.2, 4.6): train SR/SB 20621/22512, iters 10-13, 6.7 s
+[f0.002 s0]   grid b SR [4.6, 5.0): train SR/SB 11282/12160, iters 10-15, 4.9 s
+[f0.001 s1]   grid b SR [4.6, 5.0): train SR/SB 11282/12099, iters 10-12, 4.8 s
+[f0.002 s1]   grid b SR [4.6, 5.0): train SR/SB 11256/12107, iters 10-11, 4.7 s
+[f0.002 s2]   grid b SR [4.6, 5.0): train SR/SB 11253/12108, iters 10-13, 4.7 s
+[f0.001 s2]   grid b SR [5.0, inf): train SR/SB 12272/11258, iters 10-22, 4.8 s
+[f0.005 s0]   grid b SR [4.6, 5.0): train SR/SB 11266/12159, iters 10-14, 4.8 s
+[f0.002 s0]   grid b SR [5.0, inf): train SR/SB 12331/11282, iters 10-15, 4.8 s
+[f0.001 s1]   grid b SR [5.0, inf): train SR/SB 12295/11282, iters 10-14, 4.8 s
+[f0.002 s1]   grid b SR [5.0, inf): train SR/SB 12200/11256, iters 10-18, 5.2 s
+[f0.002 s2]   grid b SR [5.0, inf): train SR/SB 12304/11253, iters 10-21, 5.2 s
+[f0.005 s0]   grid b SR [5.0, inf): train SR/SB 12302/11266, iters 10-15, 5.5 s
+[f0.001 s2] fraction 0.001 seed 2: done in 5.8 min
+[f0.005 s1] fraction 0.005 seed 1: pool 959775, train 671842, ref 287933
+[f0.001 s1] fraction 0.001 seed 1: done in 5.9 min
+finished f0.001 s1 (5.9 min)
+finished f0.001 s2 (5.8 min)
+[f0.002 s0] fraction 0.002 seed 0: done in 5.9 min
+finished f0.002 s0 (5.9 min)
+[f0.005 s2] fraction 0.005 seed 2: pool 959775, train 671842, ref 287933
+[f0.01 s0] fraction 0.01 seed 0: pool 964550, train 675185, ref 289365
+[f0.002 s2] fraction 0.002 seed 2: done in 5.9 min
+[f0.002 s1] fraction 0.002 seed 1: done in 5.9 min
+finished f0.002 s1 (5.9 min)
+finished f0.002 s2 (5.9 min)
+[f0.01 s1] fraction 0.01 seed 1: pool 964550, train 675185, ref 289365
+[f0.01 s2] fraction 0.01 seed 2: pool 964550, train 675185, ref 289365
+[f0.005 s0] fraction 0.005 seed 0: done in 6.0 min
+finished f0.005 s0 (6.0 min)
+[f0.005 s1]   grid a SR [-inf, 2.4): train SR/SB 82417/218267, iters 41-56, 34.6 s
+[f0.01 s0]   grid a SR [-inf, 2.4): train SR/SB 82438/218941, iters 44-60, 34.5 s
+[f0.005 s2]   grid a SR [-inf, 2.4): train SR/SB 82266/219046, iters 47-59, 35.0 s
+[f0.01 s2]   grid a SR [-inf, 2.4): train SR/SB 82253/219127, iters 43-61, 33.4 s
+[f0.01 s1]   grid a SR [-inf, 2.4): train SR/SB 82473/218560, iters 49-61, 34.2 s
+[f0.005 s1]   grid a SR [2.4, 2.8): train SR/SB 218267/140350, iters 26-30, 36.5 s
+[f0.005 s2]   grid a SR [2.4, 2.8): train SR/SB 219046/140112, iters 24-34, 36.8 s
+[f0.01 s0]   grid a SR [2.4, 2.8): train SR/SB 218941/140100, iters 24-33, 37.8 s
+[f0.01 s2]   grid a SR [2.4, 2.8): train SR/SB 219127/140126, iters 26-34, 37.9 s
+[f0.01 s1]   grid a SR [2.4, 2.8): train SR/SB 218560/140414, iters 24-41, 38.3 s
+[f0.005 s1]   grid a SR [2.8, 3.2): train SR/SB 162075/165316, iters 14-25, 32.4 s
+[f0.005 s2]   grid a SR [2.8, 3.2): train SR/SB 161696/165581, iters 18-25, 32.2 s
+[f0.01 s0]   grid a SR [2.8, 3.2): train SR/SB 161680/166198, iters 21-27, 32.2 s
+[f0.01 s1]   grid a SR [2.8, 3.2): train SR/SB 162143/166047, iters 17-28, 31.3 s
+[f0.01 s2]   grid a SR [2.8, 3.2): train SR/SB 161917/166290, iters 17-33, 32.1 s
+[f0.005 s1]   grid a SR [3.2, 3.6): train SR/SB 95852/101378, iters 21-31, 21.8 s
+[f0.005 s2]   grid a SR [3.2, 3.6): train SR/SB 96139/100919, iters 21-31, 21.3 s
+[f0.01 s0]   grid a SR [3.2, 3.6): train SR/SB 98432/101698, iters 25-35, 23.0 s
+[f0.01 s2]   grid a SR [3.2, 3.6): train SR/SB 98403/101646, iters 25-40, 22.5 s
+[f0.01 s1]   grid a SR [3.2, 3.6): train SR/SB 98238/102059, iters 28-40, 22.8 s
+[f0.005 s1]   grid a SR [3.6, 4.0): train SR/SB 52966/57608, iters 16-23, 12.9 s
+[f0.005 s2]   grid a SR [3.6, 4.0): train SR/SB 52562/57882, iters 15-28, 13.7 s
+[f0.01 s0]   grid a SR [3.6, 4.0): train SR/SB 53405/59568, iters 20-35, 14.0 s
+[f0.01 s2]   grid a SR [3.6, 4.0): train SR/SB 53156/59563, iters 23-36, 13.4 s
+[f0.005 s1]   grid a SR [4.0, 4.4): train SR/SB 28059/31101, iters 10-17, 8.8 s
+[f0.01 s1]   grid a SR [3.6, 4.0): train SR/SB 53648/59339, iters 25-39, 14.0 s
+[f0.005 s2]   grid a SR [4.0, 4.4): train SR/SB 27986/30896, iters 10-12, 7.3 s
+[f0.005 s1]   grid a SR [4.4, 4.8): train SR/SB 15165/16766, iters 10-12, 5.1 s
+[f0.01 s0]   grid a SR [4.0, 4.4): train SR/SB 28056/31160, iters 10-13, 6.8 s
+[f0.01 s2]   grid a SR [4.0, 4.4): train SR/SB 28046/30980, iters 10-12, 6.4 s
+[f0.01 s1]   grid a SR [4.0, 4.4): train SR/SB 28041/31100, iters 10-12, 6.5 s
+[f0.005 s2]   grid a SR [4.4, 4.8): train SR/SB 15133/16730, iters 10-11, 4.9 s
+[f0.005 s1]   grid a SR [4.8, inf): train SR/SB 17041/15165, iters 10-14, 4.9 s
+[f0.01 s0]   grid a SR [4.4, 4.8): train SR/SB 15134/16805, iters 10-12, 4.9 s
+[f0.01 s2]   grid a SR [4.4, 4.8): train SR/SB 15216/16741, iters 10-10, 5.1 s
+[f0.01 s1]   grid a SR [4.4, 4.8): train SR/SB 15050/16759, iters 10-11, 4.8 s
+[f0.005 s2]   grid a SR [4.8, inf): train SR/SB 17014/15133, iters 10-13, 5.2 s
+[f0.01 s0]   grid a SR [4.8, inf): train SR/SB 17099/15134, iters 10-14, 5.5 s
+[f0.01 s2]   grid a SR [4.8, inf): train SR/SB 17067/15216, iters 10-17, 6.0 s
+[f0.01 s1]   grid a SR [4.8, inf): train SR/SB 17032/15050, iters 11-16, 6.3 s
+[f0.005 s1]   grid b SR [-inf, 2.6): train SR/SB 189685/202231, iters 47-66, 43.5 s
+[f0.005 s2]   grid b SR [-inf, 2.6): train SR/SB 190010/202388, iters 46-59, 45.2 s
+[f0.01 s0]   grid b SR [-inf, 2.6): train SR/SB 190127/202184, iters 47-61, 45.2 s
+[f0.01 s2]   grid b SR [-inf, 2.6): train SR/SB 189999/202531, iters 47-60, 45.0 s
+[f0.01 s1]   grid b SR [-inf, 2.6): train SR/SB 189945/202315, iters 49-58, 44.8 s
+[f0.005 s1]   grid b SR [2.6, 3.0): train SR/SB 202231/178111, iters 22-32, 37.9 s
+[f0.005 s2]   grid b SR [2.6, 3.0): train SR/SB 202388/178354, iters 24-32, 36.7 s
+[f0.01 s0]   grid b SR [2.6, 3.0): train SR/SB 202184/178437, iters 25-37, 39.5 s
+[f0.01 s1]   grid b SR [2.6, 3.0): train SR/SB 202315/178388, iters 25-35, 39.0 s
+[f0.01 s2]   grid b SR [2.6, 3.0): train SR/SB 202531/178513, iters 25-41, 39.7 s
+[f0.005 s1]   grid b SR [3.0, 3.4): train SR/SB 125160/132767, iters 15-31, 29.1 s
+[f0.005 s2]   grid b SR [3.0, 3.4): train SR/SB 124889/132946, iters 16-26, 30.3 s
+[f0.01 s0]   grid b SR [3.0, 3.4): train SR/SB 125694/134418, iters 22-33, 32.5 s
+[f0.01 s2]   grid b SR [3.0, 3.4): train SR/SB 125676/134644, iters 22-34, 32.7 s
+[f0.01 s1]   grid b SR [3.0, 3.4): train SR/SB 125875/134506, iters 20-30, 32.8 s
+[f0.005 s1]   grid b SR [3.4, 3.8): train SR/SB 72070/76748, iters 19-28, 22.8 s
+[f0.005 s2]   grid b SR [3.4, 3.8): train SR/SB 72169/76532, iters 19-27, 21.6 s
+[f0.01 s0]   grid b SR [3.4, 3.8): train SR/SB 74436/77401, iters 25-38, 22.9 s
+[f0.01 s2]   grid b SR [3.4, 3.8): train SR/SB 74373/77186, iters 27-33, 22.1 s
+[f0.01 s1]   grid b SR [3.4, 3.8): train SR/SB 74422/77464, iters 26-42, 22.5 s
+[f0.005 s1]   grid b SR [3.8, 4.2): train SR/SB 38504/42521, iters 10-13, 14.9 s
+[f0.005 s2]   grid b SR [3.8, 4.2): train SR/SB 38275/42273, iters 10-17, 13.5 s
+[f0.005 s1]   grid b SR [4.2, 4.6): train SR/SB 20656/22568, iters 10-14, 8.0 s
+[f0.01 s0]   grid b SR [3.8, 4.2): train SR/SB 38537/42924, iters 16-42, 11.7 s
+[f0.01 s2]   grid b SR [3.8, 4.2): train SR/SB 38346/42856, iters 16-21, 11.2 s
+[f0.005 s2]   grid b SR [4.2, 4.6): train SR/SB 20607/22512, iters 10-13, 7.7 s
+[f0.01 s1]   grid b SR [3.8, 4.2): train SR/SB 38565/43124, iters 17-26, 11.3 s
+[f0.005 s1]   grid b SR [4.6, 5.0): train SR/SB 11275/12137, iters 10-11, 6.2 s
+[f0.005 s2]   grid b SR [4.6, 5.0): train SR/SB 11256/12089, iters 10-11, 6.7 s
+[f0.01 s0]   grid b SR [4.2, 4.6): train SR/SB 20679/22511, iters 10-12, 8.1 s
+[f0.01 s2]   grid b SR [4.2, 4.6): train SR/SB 20680/22582, iters 10-13, 8.1 s
+[f0.01 s1]   grid b SR [4.2, 4.6): train SR/SB 20576/22515, iters 10-14, 8.0 s
+[f0.005 s1]   grid b SR [5.0, inf): train SR/SB 12261/11275, iters 10-15, 5.7 s
+[f0.005 s2]   grid b SR [5.0, inf): train SR/SB 12248/11256, iters 10-16, 5.1 s
+[f0.01 s0]   grid b SR [4.6, 5.0): train SR/SB 11260/12126, iters 10-16, 4.9 s
+[f0.01 s2]   grid b SR [4.6, 5.0): train SR/SB 11277/12168, iters 10-12, 4.9 s
+[f0.01 s1]   grid b SR [4.6, 5.0): train SR/SB 11233/12088, iters 10-11, 4.9 s
+[f0.01 s0]   grid b SR [5.0, inf): train SR/SB 12268/11260, iters 10-14, 5.0 s
+[f0.01 s2]   grid b SR [5.0, inf): train SR/SB 12303/11277, iters 10-13, 5.2 s
+[f0.01 s1]   grid b SR [5.0, inf): train SR/SB 12254/11233, iters 10-12, 5.8 s
+[f0.005 s1] fraction 0.005 seed 1: done in 5.7 min
+finished f0.005 s1 (5.7 min)
+[f0.005 s2] fraction 0.005 seed 2: done in 5.7 min
+finished f0.005 s2 (5.7 min)
+[f0.01 s0] fraction 0.01 seed 0: done in 5.8 min
+finished f0.01 s0 (5.8 min)
+[f0.01 s2] fraction 0.01 seed 2: done in 5.8 min
+[f0.01 s1] fraction 0.01 seed 1: done in 5.8 min
+finished f0.01 s1 (5.8 min)
+finished f0.01 s2 (5.8 min)
